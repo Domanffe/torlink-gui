@@ -26,8 +26,9 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
-      - name: Build sidecar binaries
+      - name: Build desktop assets
         run: |
+          npm run build:gui
           npm run build:sidecar
           npm run build:sidecar:bin
 
