@@ -1,11 +1,8 @@
-name: Tauri Build
+name: Release
 
 on:
   push:
-    branches: [main]
     tags: ["v*"]
-  pull_request:
-    branches: [main]
 
 permissions:
   contents: write
@@ -43,14 +40,13 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
-      - name: Build Tauri (CI / PR)
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
-        run: npm run build:tauri -- ${{ matrix.args }}
-        env:
-          CI: true
+      - name: Test before release build
+        run: |
+          npm run typecheck
+          npm test
+          cargo test --manifest-path src-tauri/Cargo.toml
 
-      - name: Build and attach to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Build and publish release
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -60,7 +56,7 @@ jobs:
           releaseName: torlink ${{ github.ref_name }}
           releaseBody: |
             Desktop installers for Windows, Linux, and macOS.
-            Auto-update bundles are included when signing key is configured.
+            See [CHANGELOG.md](https://github.com/Domanffe/torlink-gui/blob/main/CHANGELOG.md) for release notes.
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true

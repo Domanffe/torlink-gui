@@ -14,6 +14,32 @@ pub fn replace_file(tmp: &Path, dest: &Path) -> std::io::Result<()> {
     }
 }
 
+pub fn open_folder(path: &str) -> std::io::Result<()> {
+    if !Path::new(path).exists() {
+        return Err(std::io::Error::new(
+            ErrorKind::NotFound,
+            "download folder does not exist",
+        ));
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer").arg(path).spawn()?;
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open").arg(path).spawn()?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        std::process::Command::new("xdg-open").arg(path).spawn()?;
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::replace_file;

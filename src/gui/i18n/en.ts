@@ -30,6 +30,7 @@ export const en = {
     hash: "Hash",
     seedersLeechers: "{seeders} seeders · {leechers} leechers",
     download: "Download",
+    copyMagnet: "Copy magnet",
     back: "Back",
     found: "{count} found",
     searching: "Searching… {done}/{total}",
@@ -51,6 +52,7 @@ export const en = {
     pause: "Pause",
     resume: "Resume",
     cancel: "Cancel",
+    openFolder: "Open folder",
     history: "Recently downloaded",
     historyEmpty: "Completed downloads appear here.",
     downloadAgain: "Download again",
@@ -67,6 +69,7 @@ export const en = {
     pause: "Pause",
     resume: "Resume",
     stop: "Stop",
+    openFolder: "Open folder",
   },
   settings: {
     title: "Settings",
@@ -102,6 +105,9 @@ export const en = {
     added: "Added: {name}",
     retrying: "Retrying download",
     historyCleared: "History cleared",
+    magnetCopied: "Magnet link copied",
+    openFolderFailed: "Could not open folder",
+    clipboardFailed: "Could not copy to clipboard",
   },
   confirm: {
     cancelDownloadTitle: "Cancel download",

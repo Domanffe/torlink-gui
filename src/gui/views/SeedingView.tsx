@@ -6,9 +6,11 @@ import { useFormat } from "../hooks/useFormat";
 import { useLocale } from "../i18n/LocaleProvider";
 import { UploadIcon, UiIcon } from "../icons";
 import { confirmCancelDownload } from "../util/confirm";
+import { useDesktopActions } from "../hooks/useDesktopActions";
 
 export function SeedingView() {
   const { t, messages } = useLocale();
+  const { revealFolder } = useDesktopActions();
   const fmt = useFormat();
   const { list, pause, resume, remove } = useTorrents();
   const items = list.seeds;
@@ -52,6 +54,9 @@ export function SeedingView() {
                   )}
                 </div>
                 <div className="download-actions">
+                  <button type="button" className="btn btn-ghost" onClick={() => void revealFolder(it.dir)}>
+                    {t("seeding.openFolder")}
+                  </button>
                   {it.status === "seeding" ? (
                     <button type="button" className="btn btn-ghost" onClick={() => void pause(it.id)}>
                       {t("seeding.pause")}

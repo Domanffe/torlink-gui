@@ -14,6 +14,7 @@ import {
   UiIcon,
 } from "../icons";
 import { confirmCancelDownload, confirmClearHistory, confirmRemoveHistory } from "../util/confirm";
+import { useDesktopActions } from "../hooks/useDesktopActions";
 
 function isFailed(it: QueueItem): boolean {
   return it.status === "failed";
@@ -25,6 +26,7 @@ function isPaused(it: QueueItem): boolean {
 
 export function DownloadsView() {
   const { t, messages } = useLocale();
+  const { revealFolder } = useDesktopActions();
   const fmt = useFormat();
   const { list, addDownload, pause, resume, retry, remove, removeHistory, clearHistory } =
     useTorrents();
@@ -139,6 +141,9 @@ export function DownloadsView() {
                         {t("downloads.resume")}
                       </button>
                     )}
+                    <button type="button" className="btn btn-ghost" onClick={() => void revealFolder(it.dir)}>
+                      {t("downloads.openFolder")}
+                    </button>
                     <button type="button" className="btn btn-ghost" onClick={() => void cancelItem(it)}>
                       {t("downloads.cancel")}
                     </button>
@@ -177,6 +182,9 @@ export function DownloadsView() {
                       </span>
                     </div>
                     <div className="download-actions">
+                      <button type="button" className="btn btn-ghost" onClick={() => void revealFolder(h.dir)}>
+                        {t("downloads.openFolder")}
+                      </button>
                       <button type="button" className="btn btn-ghost" onClick={() => redownload(h)}>
                         {t("downloads.downloadAgain")}
                       </button>

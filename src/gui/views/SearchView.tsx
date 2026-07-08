@@ -12,6 +12,7 @@ import { useTorrents } from "../hooks/useTorrents";
 import { useFormat } from "../hooks/useFormat";
 import { useLocale } from "../i18n/LocaleProvider";
 import { MagnifierIcon, UiIcon } from "../icons";
+import { useDesktopActions } from "../hooks/useDesktopActions";
 
 export function SearchView({
   category,
@@ -21,6 +22,7 @@ export function SearchView({
   initialQuery?: string;
 }) {
   const { t } = useLocale();
+  const { copyMagnet } = useDesktopActions();
   const fmt = useFormat();
   const [input, setInput] = useState(initialQuery);
   const [activeQuery, setActiveQuery] = useState<string | null>(initialQuery.trim() || null);
@@ -105,6 +107,9 @@ export function SearchView({
           <div className="detail-actions">
             <button type="button" className="btn btn-primary" onClick={() => download(selected)}>
               {t("search.download")}
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={() => void copyMagnet(selected.magnet)}>
+              {t("search.copyMagnet")}
             </button>
             <button type="button" className="btn btn-ghost" onClick={() => setSelected(null)}>
               {t("search.back")}

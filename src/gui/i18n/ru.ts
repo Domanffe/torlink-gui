@@ -32,6 +32,7 @@ export const ru: Messages = {
     hash: "Хеш",
     seedersLeechers: "{seeders} раздающих · {leechers} качающих",
     download: "Скачать",
+    copyMagnet: "Копировать magnet",
     back: "Назад",
     found: "Найдено: {count}",
     searching: "Поиск… {done}/{total}",
@@ -53,6 +54,7 @@ export const ru: Messages = {
     pause: "Пауза",
     resume: "Продолжить",
     cancel: "Отменить",
+    openFolder: "Открыть папку",
     history: "Недавно скачанные",
     historyEmpty: "Завершённые загрузки появятся здесь.",
     downloadAgain: "Скачать снова",
@@ -69,6 +71,7 @@ export const ru: Messages = {
     pause: "Пауза",
     resume: "Продолжить",
     stop: "Остановить",
+    openFolder: "Открыть папку",
   },
   settings: {
     title: "Настройки",
@@ -104,6 +107,9 @@ export const ru: Messages = {
     added: "Добавлено: {name}",
     retrying: "Повторная загрузка",
     historyCleared: "История очищена",
+    magnetCopied: "Magnet-ссылка скопирована",
+    openFolderFailed: "Не удалось открыть папку",
+    clipboardFailed: "Не удалось скопировать в буфер обмена",
   },
   confirm: {
     cancelDownloadTitle: "Отменить загрузку",

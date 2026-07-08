@@ -1,4 +1,5 @@
 mod config;
+mod commands;
 mod fs;
 mod persistence;
 mod sidecar;
@@ -122,6 +123,7 @@ pub fn run() {
             torrent::commands::torrent_clear_history,
             torrent::commands::get_search_port,
             torrent::commands::get_version,
+            commands::open_folder,
         ])
         .build(tauri::generate_context!())
         .expect("error building torlink")
