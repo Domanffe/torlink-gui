@@ -60,6 +60,7 @@ jobs:
             Auto-update bundles are included when signing key is configured.
           releaseDraft: false
           prerelease: false
-          uploadUpdaterJson: true
+          includeUpdaterJson: true
           updaterJsonPreferNsis: true
+          tauriScript: build:tauri
           args: ${{ matrix.args }}
