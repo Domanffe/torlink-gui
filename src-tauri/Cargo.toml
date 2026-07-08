@@ -1,6 +1,6 @@
 [package]
 name = "torlink"
-version = "1.4.6"
+version = "1.4.7"
 description = "torlink torrent client"
 authors = ["Domanffe"]
 edition = "2021"

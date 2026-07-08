@@ -28,12 +28,20 @@ export function SettingsSheet({
   const [downloadDir, setDownloadDir] = useState("");
   const [trackersText, setTrackersText] = useState("");
   const [saving, setSaving] = useState(false);
+  const [appVersion, setAppVersion] = useState<string | null>(null);
 
   useEffect(() => {
     if (!visible || !config) return;
     setDownloadDir(config.downloadDir);
     setTrackersText(config.trackers.join("\n"));
   }, [visible, config]);
+
+  useEffect(() => {
+    if (!visible || !tauri) return;
+    void invoke<string>("get_version")
+      .then(setAppVersion)
+      .catch(() => setAppVersion(null));
+  }, [visible, tauri]);
 
   if (!visible) return null;
 
@@ -95,6 +103,9 @@ export function SettingsSheet({
           {tauri && (
             <div className="field">
               <span className="field-label">{t("settings.updates")}</span>
+              {appVersion ? (
+                <p className="field-hint">{format(t("settings.currentVersion"), { version: appVersion })}</p>
+              ) : null}
               {updateVersion ? (
                 <p className="field-hint">{format(t("settings.updateAvailable"), { version: updateVersion })}</p>
               ) : null}
@@ -105,8 +116,13 @@ export function SettingsSheet({
                   disabled={checking}
                   onClick={() =>
                     void (async () => {
-                      const ver = await checkForUpdate(false);
-                      if (ver) return;
+                      const result = await checkForUpdate(false);
+                      if (!result) return;
+                      if (result.status === "available") return;
+                      if (result.status === "error") {
+                        toast(format(t("settings.updateCheckFailed"), { error: result.message }), "error");
+                        return;
+                      }
                       toast(t("settings.upToDate"), "success");
                     })()
                   }

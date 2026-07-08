@@ -3,7 +3,7 @@ import type { Section } from "../App";
 import { SettingsSheet } from "../components/SettingsSheet";
 import { Sidebar } from "../components/Sidebar";
 import { Wordmark } from "../components/Wordmark";
-import { check } from "@tauri-apps/plugin-updater";
+import { runUpdateCheck } from "../util/updateCheck";
 import { useTorrents } from "../hooks/useTorrents";
 import { useLocale } from "../i18n/LocaleProvider";
 import { GearIcon, UiIcon } from "../icons";
@@ -33,7 +33,7 @@ export function Shell({
 
   useEffect(() => {
     if (!tauri) return;
-    const timer = window.setTimeout(() => void check().catch(() => {}), 4000);
+    const timer = window.setTimeout(() => void runUpdateCheck(false), 4000);
     return () => window.clearTimeout(timer);
   }, [tauri]);
 

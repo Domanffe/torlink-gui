@@ -1,0 +1,43 @@
+{
+  "version": "1.4.6",
+  "notes": "Desktop installers for Windows, Linux, and macOS.\nAuto-update bundles are included when signing key is configured.",
+  "pub_date": "2026-07-08T17:27:30.529Z",
+  "platforms": {
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRcWhIWmx5dXNXSDNwZ1ovNVg3YTJxYW5ySVM4K1d1VG5wR1VkdmdvNmxrM25WakdVUnZlZ1hrZzBVZk9wcU9hcFEraHJ3UzhpUzRoNmN6b2EzaUlxSXE5SENZRG0wQndrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzNTMxMzc0CWZpbGU6dG9ybGluay5hcHAudGFyLmd6CmZhajVoR1hoOHpubkk5TTZuTkkxSWk3NDhwbnJuNGRHMkJNZCtEMm9jSDhQMExVWmY3Y0NZRytSUnpxQWxUZ2VXWnhUNWJqQXcwVk96TnFON1lmdUFBPT0K",
+      "url": "https://github.com/Domanffe/torlink-gui/releases/download/v1.4.6/torlink_aarch64.app.tar.gz"
+    },
+    "darwin-aarch64-app": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRcWhIWmx5dXNXSDNwZ1ovNVg3YTJxYW5ySVM4K1d1VG5wR1VkdmdvNmxrM25WakdVUnZlZ1hrZzBVZk9wcU9hcFEraHJ3UzhpUzRoNmN6b2EzaUlxSXE5SENZRG0wQndrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzNTMxMzc0CWZpbGU6dG9ybGluay5hcHAudGFyLmd6CmZhajVoR1hoOHpubkk5TTZuTkkxSWk3NDhwbnJuNGRHMkJNZCtEMm9jSDhQMExVWmY3Y0NZRytSUnpxQWxUZ2VXWnhUNWJqQXcwVk96TnFON1lmdUFBPT0K",
+      "url": "https://github.com/Domanffe/torlink-gui/releases/download/v1.4.6/torlink_aarch64.app.tar.gz"
+    },
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRcWhIWmx5dXNXSDE5bkt0US9kMmRnd1UvRXFaQSszemVLTWRmKzZrTHBmdVRVTGZ3a1pQeVFKQWJtZTBJY0Ftek96TUdRTDI4TUQ2N1VycllKS1psS0hMMWJtbk03VkFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzNTMxNjQxCWZpbGU6dG9ybGlua18xLjQuNl94NjQtc2V0dXAuZXhlCnJ4Zmp6eTgyQ2V3aUhxa1ZPZzdzbFVvVDI1TnlIWTV5UXJBY3VtcDA0NFh3Mm4wMzB4Wnp6TFI1TDZ5ZE93V1duU2pjK3BJTDZtcmtJWGhpMjEwV0FRPT0K",
+      "url": "https://github.com/Domanffe/torlink-gui/releases/download/v1.4.6/torlink_1.4.6_x64-setup.exe"
+    },
+    "windows-x86_64-nsis": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRcWhIWmx5dXNXSDE5bkt0US9kMmRnd1UvRXFaQSszemVLTWRmKzZrTHBmdVRVTGZ3a1pQeVFKQWJtZTBJY0Ftek96TUdRTDI4TUQ2N1VycllKS1psS0hMMWJtbk03VkFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzNTMxNjQxCWZpbGU6dG9ybGlua18xLjQuNl94NjQtc2V0dXAuZXhlCnJ4Zmp6eTgyQ2V3aUhxa1ZPZzdzbFVvVDI1TnlIWTV5UXJBY3VtcDA0NFh3Mm4wMzB4Wnp6TFI1TDZ5ZE93V1duU2pjK3BJTDZtcmtJWGhpMjEwV0FRPT0K",
+      "url": "https://github.com/Domanffe/torlink-gui/releases/download/v1.4.6/torlink_1.4.6_x64-setup.exe"
+    },
+    "windows-x86_64-msi": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRcWhIWmx5dXNXSDlHSHZUdHJlaTk4YnRSa0xVWHVwWmpYcmpib05aVDhVMEI3ZDVyeERxWm1EZStzQkJiSStsajNhTTA5U25ady9Bd3QrMm5jSWhsSk1lMTIzNjZlYmdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzNTMxNjQxCWZpbGU6dG9ybGlua18xLjQuNl94NjRfZW4tVVMubXNpCmF3SFppKzRoWUFPZU1QUnpvM2E1cVFpZER4WGdEY1VTdkNpN1ZkZ3IvRFNhcFdaTjZ6WTZKNDdzUmpld1ZMOU5PWXVKZDZrSXZuUEN5UUZ6SzNSdUNRPT0K",
+      "url": "https://github.com/Domanffe/torlink-gui/releases/download/v1.4.6/torlink_1.4.6_x64_en-US.msi"
+    },
+    "linux-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRcWhIWmx5dXNXSHdDSEE1dzdyK0p4clAySUVseGgwVk84QzQ4YVFyQVFXSHVCaWpEZ2kyaTJLWkhTYWQzQ0dicFN5eDU0R3E0Y1Z4U2FmbGpVMmpzRTVHWnpxSE9QNUFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzNTMxNjQwCWZpbGU6dG9ybGlua18xLjQuNl9hbWQ2NC5BcHBJbWFnZQpDekNmcWFheFdySFRpYjZHZzhCNHRSRDhvMG9TNmgwZklzeW9LQmpQZE9aN0lJZ040S1VETWNycFg0SWNicGRQMnFMMmtOK3J4SE1uQXM4ck50MGVDZz09Cg==",
+      "url": "https://github.com/Domanffe/torlink-gui/releases/download/v1.4.6/torlink_1.4.6_amd64.AppImage"
+    },
+    "linux-x86_64-appimage": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRcWhIWmx5dXNXSHdDSEE1dzdyK0p4clAySUVseGgwVk84QzQ4YVFyQVFXSHVCaWpEZ2kyaTJLWkhTYWQzQ0dicFN5eDU0R3E0Y1Z4U2FmbGpVMmpzRTVHWnpxSE9QNUFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzNTMxNjQwCWZpbGU6dG9ybGlua18xLjQuNl9hbWQ2NC5BcHBJbWFnZQpDekNmcWFheFdySFRpYjZHZzhCNHRSRDhvMG9TNmgwZklzeW9LQmpQZE9aN0lJZ040S1VETWNycFg0SWNicGRQMnFMMmtOK3J4SE1uQXM4ck50MGVDZz09Cg==",
+      "url": "https://github.com/Domanffe/torlink-gui/releases/download/v1.4.6/torlink_1.4.6_amd64.AppImage"
+    },
+    "linux-x86_64-deb": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRcWhIWmx5dXNXSDVidFcrWXc2U2hvbzlHalBGZjI3Tm1iKzJCMWJMbG1aUnREbWwvYm1aSCtMV3VQOVMxdlphOG50a0RNc3FHYSt0SDJ6ZGt4RHVJRkpJbHB4elJmK2dNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzNTMxNjQwCWZpbGU6dG9ybGlua18xLjQuNl9hbWQ2NC5kZWIKN2p5QmcrUUozcXY4RTJpVGw0RThqZWhHS3JXZzFZeEhDRUlGWnNER2E1WHpDa00vcmxPbDNyamRmOWQzZU5CWlB2U3gxNXM0Y3dPOEVSTS9GNWdxQWc9PQo=",
+      "url": "https://github.com/Domanffe/torlink-gui/releases/download/v1.4.6/torlink_1.4.6_amd64.deb"
+    },
+    "linux-x86_64-rpm": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRcWhIWmx5dXNXSDR5dGgwd0s4cm96dzlNK2tpT2JOaXFHWWh6RXBnVFpGUWVKOGZ1RDVwanNvUTlnYnZ3ZTR0Zk5MRHR4SDRBWlNZWVBNRmMrWFhZMlBkdEh4ZFBTemc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgzNTMxNjQwCWZpbGU6dG9ybGluay0xLjQuNi0xLng4Nl82NC5ycG0KMU5haUpxQTZVZU1vSUFVNWpuV1J6aEpJUXdjUkxPdXpKRmhmOGFMZ2xkRlRJOHZ4OXZNYjFBOG8wQ285WTFCVTlCLy9Hb0NpT0NKWDFXZXU4UDg3QUE9PQo=",
+      "url": "https://github.com/Domanffe/torlink-gui/releases/download/v1.4.6/torlink-1.4.6-1.x86_64.rpm"
+    }
+  }
+}
