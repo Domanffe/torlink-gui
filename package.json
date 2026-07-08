@@ -28,6 +28,7 @@
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "sync:check": "node scripts/sync-check.mjs",
     "verify:seeding": "tsx scripts/verify-seeding.ts",
     "previews": "tsx scripts/render-previews.tsx",
     "prepublishOnly": "npm run build && npm run build:gui && npm run build:sidecar"
@@ -56,11 +57,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Domanffe/torlink.git"
+    "url": "git+https://github.com/Domanffe/torlink-gui.git"
   },
-  "homepage": "https://github.com/Domanffe/torlink#readme",
+  "homepage": "https://github.com/Domanffe/torlink-gui#readme",
   "bugs": {
-    "url": "https://github.com/Domanffe/torlink/issues"
+    "url": "https://github.com/Domanffe/torlink-gui/issues"
   },
   "publishConfig": {
     "access": "public"

@@ -6,7 +6,7 @@ This is a fork of [baairon/torlink](https://github.com/baairon/torlink). The sea
 
 ## Install
 
-Pick a build from [Releases](https://github.com/Domanffe/torlink/releases):
+Pick a build from [Releases](https://github.com/Domanffe/torlink-gui/releases):
 
 - Windows — `.msi`
 - macOS — `.dmg`
@@ -29,8 +29,8 @@ Search by category, queue downloads, pause and resume, seed when done. Settings 
 ## Build
 
 ```sh
-git clone https://github.com/Domanffe/torlink.git
-cd torlink
+git clone https://github.com/Domanffe/torlink-gui.git
+cd torlink-gui
 npm install
 npm run dev:tauri      # dev window + search sidecar
 npm run build:tauri    # installer in src-tauri/target/release/bundle/
@@ -52,7 +52,7 @@ Games are limited to FitGirl on purpose. If a source is down, the rest still ans
 
 ## Upstream
 
-Based on [baairon/torlink](https://github.com/baairon/torlink) (MIT). Fixes that belong in both projects are welcome upstream.
+Based on [baairon/torlink](https://github.com/baairon/torlink) (MIT). We track their **search source adapters** occasionally; see [docs/upstream.md](docs/upstream.md). No plans to merge GUI back upstream.
 
 ## Privacy
 

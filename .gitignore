@@ -1,5 +1,6 @@
 node_modules/
 dist/
 .DS_Store
+.cursor/
 src-tauri/target/
 src-tauri/binaries/search-sidecar-*
