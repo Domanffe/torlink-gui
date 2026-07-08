@@ -1,12 +1,12 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "torlink",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "identifier": "app.torlink.desktop",
   "build": {
     "frontendDist": "../dist/gui",
     "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "npm run dev:search",
+    "beforeDevCommand": "node scripts/dev-before.mjs",
     "beforeBuildCommand": "npm run build:gui && npm run build:sidecar && npm run build:sidecar:bin"
   },
   "app": {
