@@ -1,4 +1,7 @@
-# torlink
+# Torlink-Gui
+
+<img width="1130" height="741" alt="image" src="https://github.com/user-attachments/assets/86747e21-eb71-4334-b9d3-d4c2737ded5c" />
+
 
 Curated torrent search with a native desktop client.
 
