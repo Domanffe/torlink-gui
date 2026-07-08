@@ -62,5 +62,4 @@ jobs:
           prerelease: false
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
-          tauriScript: build:tauri
           args: ${{ matrix.args }}

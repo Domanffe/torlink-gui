@@ -1,6 +1,6 @@
 {
   "name": "torlnk",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "A sleek torrent finder and downloader with a modern GUI (Tauri + librqbit).",
   "type": "module",
   "bin": {
@@ -20,6 +20,7 @@
     "dev:search": "tsx scripts/dev-search.ts",
     "dev:stack": "node scripts/dev-before.mjs",
     "dev:tauri": "tauri dev",
+    "tauri": "tauri",
     "build": "tsup",
     "build:gui": "vite build",
     "build:sidecar": "tsup --config tsup.sidecar.config.ts",
