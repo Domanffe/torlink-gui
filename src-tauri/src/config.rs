@@ -3,6 +3,8 @@ use std::path::{Path, PathBuf};
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
+use crate::fs::replace_file;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AppConfig {
@@ -80,7 +82,7 @@ pub fn save_config(paths: &Paths, config: &AppConfig) -> anyhow::Result<()> {
     }
     let tmp = paths.config_file.with_extension("json.tmp");
     std::fs::write(&tmp, serde_json::to_string_pretty(config)?)?;
-    std::fs::rename(tmp, &paths.config_file)?;
+    replace_file(&tmp, &paths.config_file)?;
     Ok(())
 }
 

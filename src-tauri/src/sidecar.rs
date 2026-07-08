@@ -8,7 +8,6 @@ use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
 use tracing::{info, warn};
 
-const DEFAULT_SEARCH_PORT: u16 = 3847;
 const PORT_PREFIX: &str = "search-sidecar-port:";
 
 pub struct SearchSidecar {
@@ -36,14 +35,6 @@ impl Drop for SearchSidecar {
 
 /// Ensure the search API is reachable; spawn the bundled sidecar if needed.
 pub async fn ensure_search_sidecar(app: &AppHandle) -> anyhow::Result<SearchSidecar> {
-    if health_ok(DEFAULT_SEARCH_PORT).await {
-        info!(port = DEFAULT_SEARCH_PORT, "search sidecar already running");
-        return Ok(SearchSidecar {
-            port: DEFAULT_SEARCH_PORT,
-            child: None,
-        });
-    }
-
     match spawn_bundled_sidecar(app).await {
         Ok(sidecar) => Ok(sidecar),
         Err(e) => {
@@ -64,7 +55,8 @@ async fn spawn_bundled_sidecar(app: &AppHandle) -> anyhow::Result<SearchSidecar>
     let sidecar = app
         .shell()
         .sidecar("search-sidecar")
-        .context("search-sidecar binary not bundled (run npm run build:sidecar:bin)")?;
+        .context("search-sidecar binary not bundled (run npm run build:sidecar:bin)")?
+        .args(["0"]);
 
     let (mut rx, child) = sidecar
         .spawn()
@@ -139,7 +131,7 @@ async fn spawn_node_fallback(app: &AppHandle) -> anyhow::Result<SearchSidecar> {
     let (mut rx, child) = app
         .shell()
         .command("node")
-        .args([js.to_string_lossy().to_string()])
+        .args([js.to_string_lossy().to_string(), "0".to_string()])
         .spawn()
         .context("failed to spawn node sidecar")?;
 

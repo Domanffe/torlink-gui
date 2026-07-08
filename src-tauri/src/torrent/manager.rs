@@ -12,8 +12,9 @@ use tracing::warn;
 
 use crate::config::{ensure_dirs, load_config, save_config, AppConfig, Paths};
 use crate::persistence::{
-    load_history, load_queue, load_seeds, save_history, save_queue, save_seeds, torrent_meta_path,
-    DownloadStatus, HistoryItem, PieceMap, QueueItem, SeedItem, SeedRecord, SeedStatus,
+    load_history, load_queue, load_seeds, save_history, save_queue, save_seeds, save_torrent_meta,
+    torrent_meta_path, DownloadStatus, HistoryItem, PieceMap, QueueItem, SeedItem, SeedRecord,
+    SeedStatus,
 };
 
 const HISTORY_MAX: usize = 500;
@@ -300,6 +301,23 @@ impl TorrentManager {
         }
     }
 
+    fn cache_torrent_meta_if_ready(&self, id: &str) {
+        let meta = torrent_meta_path(&self.paths, id);
+        if meta.exists() {
+            return;
+        }
+        let Ok(tid) = torrent_id(id) else {
+            return;
+        };
+        let Ok(handle) = self.api.mgr_handle(tid) else {
+            return;
+        };
+        let Ok(bytes) = handle.with_metadata(|m| m.torrent_bytes.clone()) else {
+            return;
+        };
+        let _ = save_torrent_meta(&self.paths, id, bytes.as_ref());
+    }
+
     pub fn get_config(&self) -> AppConfig {
         self.config.clone()
     }
@@ -328,7 +346,7 @@ impl TorrentManager {
 
         if self.seeds.remove(&id).is_some() {
             if let Ok(tid) = torrent_id(&id) {
-                let _ = self.api.api_torrent_action_delete(tid).await;
+                let _ = self.api.api_torrent_action_forget(tid).await;
             }
             self.persist_seeds()?;
         }
@@ -507,12 +525,6 @@ impl TorrentManager {
         Ok(())
     }
 
-    pub fn set_trackers(&mut self, trackers: Vec<String>) -> anyhow::Result<()> {
-        self.config.trackers = trackers;
-        save_config(&self.paths, &self.config)?;
-        Ok(())
-    }
-
     pub fn list(&self) -> TorrentListResponse {
         TorrentListResponse {
             downloads: self.queue.clone(),
@@ -537,6 +549,8 @@ impl TorrentManager {
             let Some(stats) = torrent.stats.as_ref() else {
                 continue;
             };
+
+            self.cache_torrent_meta_if_ready(&hash);
 
             let progress_pct = if stats.total_bytes > 0 {
                 ((stats.progress_bytes as f64 / stats.total_bytes as f64) * 100.0).round() as u32

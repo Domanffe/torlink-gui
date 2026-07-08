@@ -1,7 +1,7 @@
-import { promises as fs, mkdirSync, writeFileSync, renameSync, existsSync, rmSync } from "node:fs";
+import { promises as fs, mkdirSync, writeFileSync, existsSync, rmSync } from "node:fs";
 import path from "node:path";
 import { queueFile, seedsFile, torrentsDir } from "../config/paths";
-import { serializeWrites, writeJsonAtomic } from "../util/atomic";
+import { replaceFile, replaceFileSync, serializeWrites, writeJsonAtomic } from "../util/atomic";
 import type { QueueItem } from "./types";
 
 const write = serializeWrites();
@@ -15,7 +15,7 @@ export function saveQueueSync(items: QueueItem[]): void {
     mkdirSync(path.dirname(queueFile), { recursive: true });
     const tmp = `${queueFile}.sync.tmp`;
     writeFileSync(tmp, JSON.stringify(items, null, 2), "utf8");
-    renameSync(tmp, queueFile);
+    replaceFileSync(tmp, queueFile);
   } catch {}
 }
 
@@ -59,7 +59,7 @@ export function saveSeedsSync(records: SeedRecord[]): void {
     mkdirSync(path.dirname(seedsFile), { recursive: true });
     const tmp = `${seedsFile}.sync.tmp`;
     writeFileSync(tmp, JSON.stringify(records, null, 2), "utf8");
-    renameSync(tmp, seedsFile);
+    replaceFileSync(tmp, seedsFile);
   } catch {}
 }
 
@@ -88,7 +88,7 @@ export async function saveTorrentMeta(id: string, data: Uint8Array): Promise<voi
     const file = torrentMetaPath(id);
     const tmp = `${file}.tmp`;
     await fs.writeFile(tmp, data);
-    await fs.rename(tmp, file);
+    await replaceFile(tmp, file);
   } catch {}
 }
 

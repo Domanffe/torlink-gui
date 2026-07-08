@@ -83,18 +83,6 @@ pub async fn torrent_remove(
 }
 
 #[tauri::command]
-pub fn torrent_set_trackers(state: State<'_, AppState>, trackers: Vec<String>) -> Result<(), String> {
-    tauri::async_runtime::block_on(async {
-        state
-            .torrents
-            .lock()
-            .await
-            .set_trackers(trackers)
-            .map_err(|e| e.to_string())
-    })
-}
-
-#[tauri::command]
 pub async fn torrent_retry(state: State<'_, AppState>, id: String) -> Result<(), String> {
     state
         .torrents

@@ -57,10 +57,7 @@ export function SettingsSheet({
         .split("\n")
         .map((l) => l.trim())
         .filter(Boolean);
-      await invoke("set_config", {
-        config: { downloadDir, trackers },
-      });
-      await invoke("torrent_set_trackers", { trackers });
+      await invoke("set_config", { config: { downloadDir, trackers } });
       toast(t("settings.saved"), "success");
       onSaved();
       onClose();

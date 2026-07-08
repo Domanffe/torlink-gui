@@ -8,6 +8,7 @@ import {
   saveTorrentMeta,
   torrentExportName,
 } from "./persist";
+import { replaceFile, writeJsonAtomic } from "../util/atomic";
 
 describe("torrent metadata export", () => {
   it("builds a safe .torrent filename from a torrent name", () => {
@@ -40,6 +41,35 @@ describe("torrent metadata export", () => {
       await expect(exportTorrentMeta("missing", "Missing", outDir)).resolves.toBeNull();
     } finally {
       await fs.rm(outDir, { recursive: true, force: true });
+    }
+  });
+
+  it("overwrites existing files when replacing via a temp file", async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "torlink-atomic-replace-"));
+    const target = path.join(dir, "state.json");
+    const tmp = `${target}.tmp`;
+    try {
+      await fs.writeFile(target, "old", "utf8");
+      await fs.writeFile(tmp, "new", "utf8");
+
+      await replaceFile(tmp, target);
+
+      await expect(fs.readFile(target, "utf8")).resolves.toBe("new");
+    } finally {
+      await fs.rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("rewrites JSON state even when the destination already exists", async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "torlink-atomic-json-"));
+    const file = path.join(dir, "queue.json");
+    try {
+      await writeJsonAtomic(file, { version: 1 });
+      await writeJsonAtomic(file, { version: 2 });
+
+      await expect(fs.readFile(file, "utf8")).resolves.toContain('"version": 2');
+    } finally {
+      await fs.rm(dir, { recursive: true, force: true });
     }
   });
 });

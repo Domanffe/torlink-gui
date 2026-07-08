@@ -3,6 +3,7 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 
 use crate::config::Paths;
+use crate::fs::replace_file;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
@@ -106,7 +107,7 @@ fn write_json_atomic<T: Serialize + ?Sized>(path: &Path, value: &T) -> anyhow::R
     }
     let tmp = path.with_extension("json.tmp");
     std::fs::write(&tmp, serde_json::to_string_pretty(value)?)?;
-    std::fs::rename(tmp, path)?;
+    replace_file(&tmp, path)?;
     Ok(())
 }
 
@@ -136,4 +137,15 @@ pub fn save_history(paths: &Paths, items: &[HistoryItem]) -> anyhow::Result<()> 
 
 pub fn torrent_meta_path(paths: &Paths, id: &str) -> std::path::PathBuf {
     paths.torrents_dir.join(format!("{id}.torrent"))
+}
+
+pub fn save_torrent_meta(paths: &Paths, id: &str, data: &[u8]) -> anyhow::Result<()> {
+    let path = torrent_meta_path(paths, id);
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    let tmp = path.with_extension("torrent.tmp");
+    std::fs::write(&tmp, data)?;
+    replace_file(&tmp, &path)?;
+    Ok(())
 }

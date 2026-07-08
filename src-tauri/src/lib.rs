@@ -1,4 +1,5 @@
 mod config;
+mod fs;
 mod persistence;
 mod sidecar;
 mod torrent;
@@ -119,7 +120,6 @@ pub fn run() {
             torrent::commands::torrent_retry,
             torrent::commands::torrent_remove_history,
             torrent::commands::torrent_clear_history,
-            torrent::commands::torrent_set_trackers,
             torrent::commands::get_search_port,
             torrent::commands::get_version,
         ])
