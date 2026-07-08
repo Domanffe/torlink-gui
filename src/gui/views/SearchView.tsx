@@ -8,6 +8,8 @@ import { sourceStyle } from "../../ui/theme";
 import { CATEGORY_GROUP } from "../sections";
 import { useSearch, useSearchPort } from "../hooks/useSearch";
 import { useTorrents } from "../hooks/useTorrents";
+import { useLocale } from "../i18n/LocaleProvider";
+import { MagnifierIcon, UiIcon } from "../icons";
 
 export function SearchView({
   category,
@@ -16,6 +18,7 @@ export function SearchView({
   category: Section;
   initialQuery?: string;
 }) {
+  const { t } = useLocale();
   const [input, setInput] = useState(initialQuery);
   const [activeQuery, setActiveQuery] = useState<string | null>(initialQuery.trim() || null);
   const [selected, setSelected] = useState<TorrentResult | null>(null);
@@ -75,7 +78,7 @@ export function SearchView({
   if (selected) {
     const ss = sourceStyle(selected.source);
     return (
-      <Card title="Details">
+      <Card title={t("search.details")}>
         <div className="detail">
           <div className="detail-head">
             <h2>{selected.name}</h2>
@@ -84,21 +87,24 @@ export function SearchView({
             </span>
           </div>
           <dl className="detail-grid">
-            <dt>Size</dt>
+            <dt>{t("search.size")}</dt>
             <dd>{formatBytes(selected.sizeBytes)}</dd>
-            <dt>Health</dt>
+            <dt>{t("search.health")}</dt>
             <dd>
-              <span className="good">{selected.seeders}</span> seeders · {selected.leechers} leechers
+              {t("search.seedersLeechers", {
+                seeders: String(selected.seeders),
+                leechers: String(selected.leechers),
+              })}
             </dd>
-            <dt>Hash</dt>
+            <dt>{t("search.hash")}</dt>
             <dd className="mono">{selected.infoHash}</dd>
           </dl>
           <div className="detail-actions">
             <button type="button" className="btn btn-primary" onClick={() => download(selected)}>
-              Download
+              {t("search.download")}
             </button>
             <button type="button" className="btn btn-ghost" onClick={() => setSelected(null)}>
-              Back
+              {t("search.back")}
             </button>
           </div>
         </div>
@@ -110,49 +116,47 @@ export function SearchView({
     <div className="search-view">
       <div className="search-bar">
         <span className="search-bar-icon" aria-hidden>
-          ⌕
+          <UiIcon icon={MagnifierIcon} size={18} />
         </span>
         <input
           id="main-search"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit()}
-          placeholder="Search or paste a magnet link…"
+          placeholder={t("search.placeholder")}
         />
       </div>
 
       <Card
-        title="Results"
+        title={t("search.results")}
         subtitle={
           results.length > 0
-            ? `${results.length} found`
+            ? t("search.found", { count: results.length })
             : activeQuery
               ? search.loading
-                ? `Searching… ${search.done}/${search.total}`
+                ? t("search.searching", { done: search.done, total: search.total })
                 : undefined
               : undefined
         }
       >
-        {activeQuery === null && (
-          <p className="empty">Type a query and press Enter to search all sources.</p>
-        )}
+        {activeQuery === null && <p className="empty">{t("search.emptyHint")}</p>}
         {search.loading && activeQuery && results.length === 0 && (
           <p className="status">
-            Searching… {search.done}/{search.total}
+            {t("search.searching", { done: search.done, total: search.total })}
           </p>
         )}
         {activeQuery && !search.loading && results.length === 0 && (
-          <p className="empty">No results.</p>
+          <p className="empty">{t("search.noResults")}</p>
         )}
         {results.length > 0 && (
           <table className="results-table">
             <thead>
               <tr>
                 <th className="col-idx">#</th>
-                <th className="col-name">Name</th>
-                <th className="col-size">Size</th>
-                <th className="col-health">Seed:Lee</th>
-                <th className="col-src">Src</th>
+                <th className="col-name">{t("search.colName")}</th>
+                <th className="col-size">{t("search.colSize")}</th>
+                <th className="col-health">{t("search.colHealth")}</th>
+                <th className="col-src">{t("search.colSrc")}</th>
               </tr>
             </thead>
             <tbody>

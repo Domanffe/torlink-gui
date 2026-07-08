@@ -11,6 +11,13 @@ import {
 import { sourceStyle } from "../../ui/theme";
 import type { HistoryItem, QueueItem } from "../hooks/useTorrents";
 import { useTorrents } from "../hooks/useTorrents";
+import { useLocale } from "../i18n/LocaleProvider";
+import {
+  BatteryPauseIcon,
+  DownloadIcon,
+  TriangleAlertIcon,
+  UiIcon,
+} from "../icons";
 import { confirmCancelDownload, confirmClearHistory, confirmRemoveHistory } from "../util/confirm";
 
 function isFailed(it: QueueItem): boolean {
@@ -22,13 +29,15 @@ function isPaused(it: QueueItem): boolean {
 }
 
 export function DownloadsView() {
+  const { t, messages } = useLocale();
   const { list, addDownload, pause, resume, retry, remove, removeHistory, clearHistory } =
     useTorrents();
   const items = list.downloads;
   const history = list.history;
+  const confirm = messages.confirm;
 
   const cancelItem = async (it: QueueItem): Promise<void> => {
-    const choice = await confirmCancelDownload(truncate(it.name, 40));
+    const choice = await confirmCancelDownload(truncate(it.name, 40), confirm);
     if (choice === "keep") await remove(it.id, false);
     else if (choice === "delete") await remove(it.id, true);
   };
@@ -59,14 +68,17 @@ export function DownloadsView() {
   };
 
   const clearAll = async (): Promise<void> => {
-    if (await confirmClearHistory()) await clearHistory();
+    if (await confirmClearHistory(confirm)) await clearHistory();
   };
 
   return (
     <div className="downloads-view">
-      <Card title="Active" subtitle={items.length ? `${items.length} items` : undefined}>
+      <Card
+        title={t("downloads.active")}
+        subtitle={items.length ? t("downloads.items", { count: items.length }) : undefined}
+      >
         {items.length === 0 ? (
-          <p className="empty">No active downloads.</p>
+          <p className="empty">{t("downloads.empty")}</p>
         ) : (
           <ul className="download-list">
             {items.map((it) => {
@@ -77,7 +89,13 @@ export function DownloadsView() {
                 <li key={it.id} className={`download-item${failed ? " download-item--failed" : ""}`}>
                   <div className="download-head">
                     <span className="download-icon" aria-hidden>
-                      {failed ? "!" : paused ? "⏸" : "↓"}
+                      {failed ? (
+                        <UiIcon icon={TriangleAlertIcon} size={17} />
+                      ) : paused ? (
+                        <UiIcon icon={BatteryPauseIcon} size={17} />
+                      ) : (
+                        <UiIcon icon={DownloadIcon} size={17} />
+                      )}
                     </span>
                     <span className="download-name">{truncate(it.name, 48)}</span>
                     <span className="download-meta">
@@ -93,14 +111,18 @@ export function DownloadsView() {
                   {it.error && <p className="download-error">{it.error}</p>}
                   <div className="download-stats">
                     {failed ? (
-                      <span className="muted">Failed · {it.progress}%</span>
+                      <span className="muted">
+                        {t("downloads.failed")} · {it.progress}%
+                      </span>
                     ) : paused ? (
-                      <span className="muted">Paused · {it.progress}%</span>
+                      <span className="muted">
+                        {t("downloads.paused")} · {it.progress}%
+                      </span>
                     ) : (
                       <>
                         <span>{it.progress}%</span>
                         <span>{formatBytesPerSec(it.speed) || "…"}</span>
-                        <span>· {it.peers} peers</span>
+                        <span>· {t("downloads.peers", { count: it.peers })}</span>
                         {it.eta != null && it.eta > 0 && (
                           <span>· {formatEtaShort(it.eta)}</span>
                         )}
@@ -110,19 +132,19 @@ export function DownloadsView() {
                   <div className="download-actions">
                     {failed ? (
                       <button type="button" className="btn btn-primary" onClick={() => void retry(it.id)}>
-                        Retry
+                        {t("downloads.retry")}
                       </button>
                     ) : it.status === "downloading" ? (
                       <button type="button" className="btn btn-ghost" onClick={() => void pause(it.id)}>
-                        Pause
+                        {t("downloads.pause")}
                       </button>
                     ) : (
                       <button type="button" className="btn btn-ghost" onClick={() => void resume(it.id)}>
-                        Resume
+                        {t("downloads.resume")}
                       </button>
                     )}
                     <button type="button" className="btn btn-ghost" onClick={() => void cancelItem(it)}>
-                      Cancel
+                      {t("downloads.cancel")}
                     </button>
                   </div>
                 </li>
@@ -133,12 +155,12 @@ export function DownloadsView() {
       </Card>
 
       <Card
-        title="Recently downloaded"
-        subtitle={history.length ? `${history.length} items` : undefined}
+        title={t("downloads.history")}
+        subtitle={history.length ? t("downloads.items", { count: history.length }) : undefined}
         className="history-card"
       >
         {history.length === 0 ? (
-          <p className="empty empty--compact">Completed downloads appear here.</p>
+          <p className="empty empty--compact">{t("downloads.historyEmpty")}</p>
         ) : (
           <>
             <ul className="history-list">
@@ -160,18 +182,18 @@ export function DownloadsView() {
                     </div>
                     <div className="download-actions">
                       <button type="button" className="btn btn-ghost" onClick={() => redownload(h)}>
-                        Download again
+                        {t("downloads.downloadAgain")}
                       </button>
                       <button
                         type="button"
                         className="btn btn-ghost"
                         onClick={async () => {
-                          if (await confirmRemoveHistory(truncate(h.name, 40))) {
+                          if (await confirmRemoveHistory(truncate(h.name, 40), confirm)) {
                             await removeHistory(h.id);
                           }
                         }}
                       >
-                        Remove
+                        {t("downloads.remove")}
                       </button>
                     </div>
                   </li>
@@ -180,7 +202,7 @@ export function DownloadsView() {
             </ul>
             <div className="history-footer">
               <button type="button" className="btn btn-ghost" onClick={() => void clearAll()}>
-                Clear history
+                {t("downloads.clearHistory")}
               </button>
             </div>
           </>

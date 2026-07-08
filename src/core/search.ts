@@ -1,35 +1,18 @@
 import { cachedSearch } from "../sources/cache";
 import { loadAllSources } from "../sources/registry";
-import { SOURCE_IDS } from "../sources/meta";
 import { HttpError } from "../util/net";
-import type { SourceId, TorrentResult } from "../sources/types";
+import type { TorrentResult } from "../sources/types";
+import {
+  blankPerSource,
+  type ConcurrentSearchState,
+} from "./search-state";
 
-export interface SourceState {
-  loading: boolean;
-  error: string | null;
-  code: string | null;
-  count: number;
-}
-
-export interface ConcurrentSearchState {
-  results: TorrentResult[];
-  perSource: Record<SourceId, SourceState>;
-  loading: boolean;
-  done: number;
-  total: number;
-}
+export type { ConcurrentSearchState, SourceState } from "./search-state";
+export { blankPerSource, idleSearchState } from "./search-state";
 
 function errorCode(e: unknown): string {
   if (e instanceof HttpError && e.status > 0) return `HTTP ${e.status}`;
   return "no response";
-}
-
-export function blankPerSource(loading: boolean): Record<SourceId, SourceState> {
-  const out = {} as Record<SourceId, SourceState>;
-  for (const id of SOURCE_IDS) {
-    out[id] = { loading, error: null, code: null, count: 0 };
-  }
-  return out;
 }
 
 export function dedupeResults(list: TorrentResult[]): TorrentResult[] {
@@ -47,16 +30,6 @@ export function defaultResultOrder(list: TorrentResult[]): TorrentResult[] {
     if (b.seeders !== a.seeders) return b.seeders - a.seeders;
     return (b.added ?? 0) - (a.added ?? 0);
   });
-}
-
-export function idleSearchState(): ConcurrentSearchState {
-  return {
-    results: [],
-    perSource: blankPerSource(false),
-    loading: false,
-    done: 0,
-    total: SOURCE_IDS.length,
-  };
 }
 
 export interface SearchCallbacks {

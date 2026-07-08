@@ -151,6 +151,8 @@ textarea {
 }
 
 .splash-search-icon {
+  display: flex;
+  align-items: center;
   color: var(--text-muted);
   flex-shrink: 0;
 }
@@ -283,9 +285,26 @@ textarea {
 }
 
 .nav-icon {
-  width: 1.1rem;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
   opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.ui-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.nav-icon .cursor-pointer,
+.icon-btn .cursor-pointer,
+.download-icon .cursor-pointer,
+.search-bar-icon .cursor-pointer,
+.splash-search-icon .cursor-pointer,
+.wordmark-bolt .cursor-pointer {
+  cursor: inherit;
 }
 
 .nav-badge {
@@ -370,7 +389,10 @@ textarea {
 }
 
 .search-bar-icon {
+  display: flex;
+  align-items: center;
   color: var(--text-muted);
+  flex-shrink: 0;
 }
 
 /* ── Results ──────────────────────────────────────── */
@@ -787,7 +809,8 @@ textarea {
 }
 
 .field-input,
-.field-textarea {
+.field-textarea,
+.field-select {
   flex: 1;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
@@ -798,8 +821,14 @@ textarea {
   transition: border-color 0.15s;
 }
 
+.field-select {
+  cursor: pointer;
+  width: 100%;
+}
+
 .field-input:focus,
-.field-textarea:focus {
+.field-textarea:focus,
+.field-select:focus {
   border-color: var(--accent);
 }
 

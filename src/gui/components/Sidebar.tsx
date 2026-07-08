@@ -1,16 +1,28 @@
 import type { Section } from "../App";
+import { useLocale } from "../i18n/LocaleProvider";
+import {
+  DownloadIcon,
+  GamepadIcon,
+  GlobeIcon,
+  PlayerIcon,
+  RadioIcon,
+  SparklesIcon,
+  UiIcon,
+  UploadIcon,
+  type IconComponent,
+} from "../icons";
 
-const FILTERS: { key: Section; label: string; icon: string }[] = [
-  { key: "all", label: "All", icon: "◎" },
-  { key: "games", label: "Games", icon: "🎮" },
-  { key: "movies", label: "Movies", icon: "🎬" },
-  { key: "tv", label: "TV", icon: "📺" },
-  { key: "anime", label: "Anime", icon: "✦" },
+const FILTERS: { key: Section; labelKey: string; icon: IconComponent }[] = [
+  { key: "all", labelKey: "section.all", icon: GlobeIcon },
+  { key: "games", labelKey: "section.games", icon: GamepadIcon },
+  { key: "movies", labelKey: "section.movies", icon: PlayerIcon },
+  { key: "tv", labelKey: "section.tv", icon: RadioIcon },
+  { key: "anime", labelKey: "section.anime", icon: SparklesIcon },
 ];
 
-const LIBRARY: { key: Section; label: string; icon: string }[] = [
-  { key: "downloads", label: "Downloads", icon: "↓" },
-  { key: "seeding", label: "Seeding", icon: "↑" },
+const LIBRARY: { key: Section; labelKey: string; icon: IconComponent }[] = [
+  { key: "downloads", labelKey: "section.downloads", icon: DownloadIcon },
+  { key: "seeding", labelKey: "section.seeding", icon: UploadIcon },
 ];
 
 export function Sidebar({
@@ -24,6 +36,8 @@ export function Sidebar({
   downloadCount: number;
   seedCount: number;
 }) {
+  const { t } = useLocale();
+
   const badge = (key: Section): number | null => {
     if (key === "downloads" && downloadCount > 0) return downloadCount;
     if (key === "seeding" && seedCount > 0) return seedCount;
@@ -31,8 +45,8 @@ export function Sidebar({
   };
 
   return (
-    <nav className="sidebar" aria-label="Navigation">
-      <span className="nav-label">Browse</span>
+    <nav className="sidebar" aria-label={t("nav.aria")}>
+      <span className="nav-label">{t("nav.browse")}</span>
       <ul className="nav-group">
         {FILTERS.map((item) => (
           <li key={item.key}>
@@ -42,14 +56,14 @@ export function Sidebar({
               onClick={() => onSection(item.key)}
             >
               <span className="nav-icon" aria-hidden>
-                {item.icon}
+                <UiIcon icon={item.icon} size={17} />
               </span>
-              {item.label}
+              {t(item.labelKey)}
             </button>
           </li>
         ))}
       </ul>
-      <span className="nav-label">Library</span>
+      <span className="nav-label">{t("nav.library")}</span>
       <ul className="nav-group">
         {LIBRARY.map((item) => {
           const n = badge(item.key);
@@ -61,9 +75,9 @@ export function Sidebar({
                 onClick={() => onSection(item.key)}
               >
                 <span className="nav-icon" aria-hidden>
-                  {item.icon}
+                  <UiIcon icon={item.icon} size={17} />
                 </span>
-                {item.label}
+                {t(item.labelKey)}
                 {n != null && <span className="nav-badge">{n}</span>}
               </button>
             </li>

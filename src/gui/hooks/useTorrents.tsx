@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { useToast, type ToastKind } from "../components/Toast";
+import { useLocale } from "../i18n/LocaleProvider";
 import { errMsg } from "../util/errors";
 
 export interface QueueItem {
@@ -90,6 +91,7 @@ function isTauri(): boolean {
 
 export function TorrentProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const { t } = useLocale();
   const [list, setList] = useState<TorrentList>(EMPTY_LIST);
   const [config, setConfig] = useState<AppConfig | null>(null);
   const tauri = isTauri();
@@ -137,7 +139,7 @@ export function TorrentProvider({ children }: { children: ReactNode }) {
       sizeBytes?: number;
     }) => {
       if (!tauri) {
-        toast("Downloads require the torlink desktop app.", "error");
+        toast(t("toast.desktopRequired"), "error");
         return;
       }
       try {
@@ -150,13 +152,13 @@ export function TorrentProvider({ children }: { children: ReactNode }) {
           source: item.source ?? null,
           sizeBytes: item.sizeBytes ?? null,
         });
-        toast(`Added: ${item.name}`, "success");
+        toast(t("toast.added", { name: item.name }), "success");
         await refresh();
       } catch (e) {
         toast(errMsg(e), "error");
       }
     },
-    [config, refresh, tauri, toast],
+    [config, refresh, tauri, toast, t],
   );
 
   const pause = useCallback(
@@ -172,10 +174,10 @@ export function TorrentProvider({ children }: { children: ReactNode }) {
   const retry = useCallback(
     (id: string) =>
       runAction(() => invoke("torrent_retry", { id }), {
-        message: "Retrying download",
+        message: t("toast.retrying"),
         kind: "info",
       }),
-    [runAction],
+    [runAction, t],
   );
 
   const remove = useCallback(
@@ -192,10 +194,10 @@ export function TorrentProvider({ children }: { children: ReactNode }) {
   const clearHistory = useCallback(
     () =>
       runAction(() => invoke("torrent_clear_history"), {
-        message: "History cleared",
+        message: t("toast.historyCleared"),
         kind: "info",
       }),
-    [runAction],
+    [runAction, t],
   );
 
   return (

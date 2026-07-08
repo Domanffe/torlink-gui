@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Wordmark } from "../components/Wordmark";
+import { useLocale } from "../i18n/LocaleProvider";
+import { MagnifierIcon, UiIcon } from "../icons";
 
 export function SplashView({
   onBrowse,
@@ -8,6 +10,7 @@ export function SplashView({
   onBrowse: () => void;
   onSearch: (q: string) => void;
 }) {
+  const { t } = useLocale();
   const [query, setQuery] = useState("");
 
   const submit = (): void => {
@@ -19,29 +22,29 @@ export function SplashView({
   return (
     <div className="splash">
       <Wordmark size="lg" />
-      <p className="splash-tagline">Search curated sources. Download with native speed.</p>
-      <p className="splash-cats">games · movies · tv · anime</p>
+      <p className="splash-tagline">{t("splash.tagline")}</p>
+      <p className="splash-cats">{t("splash.categories")}</p>
 
       <div className="splash-search-card">
         <div className="splash-search-inner">
           <span className="splash-search-icon" aria-hidden>
-            ⌕
+            <UiIcon icon={MagnifierIcon} size={20} />
           </span>
           <input
             className="splash-input"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submit()}
-            placeholder="Search or paste a magnet link…"
+            placeholder={t("splash.searchPlaceholder")}
             autoFocus
           />
         </div>
       </div>
 
       <p className="splash-hints">
-        <kbd>Enter</kbd> to search
+        <kbd>Enter</kbd> {t("splash.enterToSearch")}
         <span className="dot">·</span>
-        empty <kbd>Enter</kbd> to browse
+        {t("splash.emptyEnter")} <kbd>Enter</kbd> {t("splash.enterToBrowse")}
       </p>
     </div>
   );

@@ -5,6 +5,7 @@ export { SOURCE_IDS, SOURCE_META, getSourceMeta, allSourceMeta };
 
 const LOADERS: Record<SourceId, () => Promise<Source>> = {
   fitgirl: () => import("./fitgirl").then((m) => m.fitgirl),
+  "online-fix": () => import("./online-fix").then((m) => m.onlineFix),
   yts: () => import("./yts").then((m) => m.yts),
   "tpb-movies": () => import("./piratebay").then((m) => m.tpbMovies),
   "x1337-movies": () => import("./x1337").then((m) => m.x1337Movies),

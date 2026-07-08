@@ -4,6 +4,8 @@ import { SettingsSheet } from "../components/SettingsSheet";
 import { Sidebar } from "../components/Sidebar";
 import { Wordmark } from "../components/Wordmark";
 import { useTorrents } from "../hooks/useTorrents";
+import { useLocale } from "../i18n/LocaleProvider";
+import { GearIcon, UiIcon } from "../icons";
 import { SECTION_ORDER, SEARCH_SECTIONS } from "../sections";
 
 const SearchView = lazy(() => import("../views/SearchView").then((m) => ({ default: m.SearchView })));
@@ -21,6 +23,7 @@ export function Shell({
   initialQuery?: string;
   initialSection?: Section;
 }) {
+  const { t } = useLocale();
   const [section, setSection] = useState<Section>(initialSection);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { list, config, refreshConfig } = useTorrents();
@@ -54,10 +57,10 @@ export function Shell({
             type="button"
             className="icon-btn"
             onClick={() => setSettingsOpen(true)}
-            title="Settings (Ctrl+,)"
-            aria-label="Settings"
+            title={t("shell.settingsTitle")}
+            aria-label={t("shell.settings")}
           >
-            ⚙
+            <UiIcon icon={GearIcon} size={20} />
           </button>
         </div>
       </header>
@@ -69,7 +72,7 @@ export function Shell({
           seedCount={activeSeed}
         />
         <main className="main">
-          <Suspense fallback={<p className="status">Loading…</p>}>
+          <Suspense fallback={<p className="status">{t("shell.loading")}</p>}>
             {SEARCH_SECTIONS.has(section) && (
               <SearchView category={section} initialQuery={initialQuery} />
             )}

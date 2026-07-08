@@ -10,6 +10,7 @@ export interface SourceMeta {
 
 export const SOURCE_IDS: readonly SourceId[] = [
   "fitgirl",
+  "online-fix",
   "yts",
   "tpb-movies",
   "x1337-movies",
@@ -26,6 +27,13 @@ export const SOURCE_META: Record<SourceId, SourceMeta> = {
     label: "FitGirl",
     group: "Games",
     homepage: "https://fitgirl-repacks.site",
+    reportsHealth: false,
+  },
+  "online-fix": {
+    id: "online-fix",
+    label: "Online-Fix",
+    group: "Games",
+    homepage: "https://online-fix.me",
     reportsHealth: false,
   },
   yts: {

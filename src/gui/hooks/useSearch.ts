@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ConcurrentSearchState } from "../../core/search";
-import { idleSearchState } from "../../core/search";
+import type { ConcurrentSearchState } from "../../core/search-state";
+import { idleSearchState } from "../../core/search-state";
 
 function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;

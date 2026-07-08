@@ -30,6 +30,7 @@ export const GUTTER = 2;
 
 export const SOURCE_STYLE: Record<SourceId, { tag: string; color: string }> = {
   fitgirl: { tag: "FG", color: COLOR.accent },
+  "online-fix": { tag: "OF", color: "#7dd3fc" },
   yts: { tag: "YTS", color: COLOR.good },
   eztv: { tag: "EZTV", color: COLOR.warn },
   nyaa: { tag: "NYAA", color: COLOR.bright },

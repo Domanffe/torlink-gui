@@ -1,6 +1,39 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
-.DS_Store
-.cursor/
+
+# Rust / Tauri
 src-tauri/target/
 src-tauri/binaries/search-sidecar-*
+
+# IDE & agent tooling
+.cursor/
+.idea/
+*.swp
+*.swo
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets & local env
+.env
+.env.*
+!.env.example
+
+# Logs & diagnostics
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Tooling caches
+*.tsbuildinfo
+coverage/
+
+# Local scratch / debug dumps
+.tmp*
+*.tmp

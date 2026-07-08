@@ -1,34 +1,46 @@
 import { message } from "@tauri-apps/plugin-dialog";
+import type { Messages } from "../i18n/en";
+import { format } from "../i18n/locale";
 
-export async function confirmCancelDownload(name: string): Promise<"keep" | "delete" | null> {
-  const result = await message(`Cancel "${name}"?`, {
-    title: "Cancel download",
+function yesNoCancel(m: Messages["confirm"]) {
+  return { yes: m.yes, no: m.no, cancel: m.back };
+}
+
+export async function confirmCancelDownload(
+  name: string,
+  m: Messages["confirm"],
+): Promise<"keep" | "delete" | null> {
+  const result = await message(format(m.cancelDownloadMessage, { name }), {
+    title: m.cancelDownloadTitle,
     kind: "warning",
     buttons: {
-      yes: "Keep files",
-      no: "Delete files",
-      cancel: "Back",
+      yes: m.keepFiles,
+      no: m.deleteFiles,
+      cancel: m.back,
     },
   });
-  if (result === "Keep files") return "keep";
-  if (result === "Delete files") return "delete";
+  if (result === m.keepFiles) return "keep";
+  if (result === m.deleteFiles) return "delete";
   return null;
 }
 
-export async function confirmClearHistory(): Promise<boolean> {
-  const result = await message("Remove all completed downloads from history?", {
-    title: "Clear history",
+export async function confirmClearHistory(m: Messages["confirm"]): Promise<boolean> {
+  const result = await message(m.clearHistoryMessage, {
+    title: m.clearHistoryTitle,
     kind: "warning",
-    buttons: "YesNo",
+    buttons: yesNoCancel(m),
   });
-  return result === "Yes";
+  return result === m.yes;
 }
 
-export async function confirmRemoveHistory(name: string): Promise<boolean> {
-  const result = await message(`Remove "${name}" from history?`, {
-    title: "Remove from history",
+export async function confirmRemoveHistory(
+  name: string,
+  m: Messages["confirm"],
+): Promise<boolean> {
+  const result = await message(format(m.removeHistoryMessage, { name }), {
+    title: m.removeHistoryTitle,
     kind: "warning",
-    buttons: "YesNo",
+    buttons: yesNoCancel(m),
   });
-  return result === "Yes";
+  return result === m.yes;
 }
