@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 1.4.8 — 2026-07-08
+
+### Fixed
+- Desktop app no longer hangs on startup when torrent restore blocks on unreachable trackers
+- Search source pages decode declared charsets correctly, fixing mojibake in titles
+- CI and release workflows install Linux desktop deps and build sidecar binaries before Tauri
+
+### Changed
+- Updater endpoints prefer jsDelivr and raw.githubusercontent.com over GitHub Releases
+
 ## 1.4.7 — 2026-07-08
 
 ### Fixed

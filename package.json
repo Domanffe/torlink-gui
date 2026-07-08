@@ -1,6 +1,6 @@
 {
   "name": "torlnk",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "description": "A sleek torrent finder and downloader with a modern GUI (Tauri + librqbit).",
   "type": "module",
   "bin": {
