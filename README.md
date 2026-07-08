@@ -1,44 +1,45 @@
-<p align="center">
-  <img src="preview/splash.svg" alt="torlink, curated torrents straight from your terminal" style="max-width: 832px; width: 100%; height: auto;">
-</p>
+# torlink
 
-Finding a torrent these days sucks. One site is a minefield of fake download buttons. Another hides the real link under a popup that spawns two more tabs. And after all that, half the results are dead, zero seeders.
+Curated torrent search with a native desktop client.
 
-torlink is a torrent finder that lives in your terminal, with zero setup and nothing to configure. One search checks a short, curated list of reputable sources at once, and whatever you pick downloads straight to your computer. The files are yours, saved to your downloads folder.
+This is a fork of [baairon/torlink](https://github.com/baairon/torlink). The search side is the same — FitGirl, YTS, 1337x, and the rest — but downloads run in a **Tauri** app through **librqbit**, not WebTorrent in the terminal.
 
-## Get started
+## Install
 
-1. **Install Node** (from [nodejs.org](https://nodejs.org)), it's all torlink needs.
-2. **Open your terminal.**
-3. **Start it:**
+Pick a build from [Releases](https://github.com/Domanffe/torlink/releases):
 
-   ```sh
-   npx torlnk
-   ```
+- Windows — `.msi`
+- macOS — `.dmg`
+- Linux — `.AppImage`
 
-That's the only thing you'll type. torlink opens straight to a search bar: search for what you want, paste in a magnet link or a bare infohash, or just press Enter on an empty box to browse the curated library. From there it's all keypresses, nothing to memorize, and `?` brings up the full list anytime.
+No Node required for the desktop app.
 
-## Finding something
+If you only need search, `npx torlnk` still opens the web UI in a browser (Node 22+). Downloads from the browser build are not supported — use the desktop app for that.
 
-Type what you're looking for and press Enter. Results stream in from every source as they answer, tagged with size and how many people are sharing each one, so you can see what'll come down fast. Arrow to what you want and press `d` to save it, or `shift+d` to pick a different folder for just that download.
+## Desktop app
 
-<p align="center">
-  <img src="preview/browse.svg" alt="torlink's browse view: the sidebar, the search bar, and merged results from every source" style="max-width: 832px; width: 100%; height: auto;">
-</p>
+Search by category, queue downloads, pause and resume, seed when done. Settings (⚙ or `Ctrl+,`) let you change the download folder and add extra trackers. Closing the window sends the app to the system tray.
 
-## Your downloads
+**Downloads** — pause, resume, retry on failure, cancel with a choice to keep or delete files on disk.
 
-Active downloads sit up top with their progress, speed, and time left; when one finishes it drops into Recently downloaded just below, so the list stays tidy. Everything's still there when you come back, and anything interrupted picks up where it left off.
+**History** — finished torrents sit under “Recently downloaded”; you can grab them again or clear the list.
 
-Downloads run in the background while you keep searching, so you can queue up as many as you want. They save to your downloads folder, and the Downloads pane keeps tabs on each one; press `o` anytime to change where that is, or grab one result with `shift+d` to send it somewhere else without touching the default. When something finishes it keeps seeding automatically so the next person can find it too, and the Seeding tab lets you pause or stop that anytime.
+**Shortcuts** (when the main view is focused): `/` focus search · `Tab` next section · `d` download · `p` pause · `f` retry · `c` cancel
 
-<p align="center">
-  <img src="preview/downloads.svg" alt="torlink's Downloads pane: live progress on top, recently downloaded below" style="max-width: 832px; width: 100%; height: auto;">
-</p>
+## Build
 
-## What it searches
+```sh
+git clone https://github.com/Domanffe/torlink.git
+cd torlink
+npm install
+npm run dev:tauri      # dev window + search sidecar
+npm run build:tauri    # installer in src-tauri/target/release/bundle/
+npm test
+```
 
-A short, hand-picked list of trusted sources:
+The installer bundles **librqbit** (torrents) and a packaged **search-sidecar** binary.
+
+## Sources
 
 | Category | Sources |
 | --- | --- |
@@ -47,39 +48,12 @@ A short, hand-picked list of trusted sources:
 | TV | EZTV, The Pirate Bay, 1337x |
 | Anime | Nyaa, SubsPlease |
 
-Games are the only category that can run code, so they come from FitGirl alone, a repacker with a long, trusted track record; everything else is plain video and subtitles. If a source is down, the search carries on without it, and torlink tells you which one is offline.
+Games are limited to FitGirl on purpose. If a source is down, the rest still answer.
 
-## Contributing
+## Upstream
 
-To run or work on torlink locally:
-
-1. Clone the repository and open the folder.
-2. Install dependencies:
-   ```sh
-   npm install
-   ```
-3. Run the development version:
-   ```sh
-   npm run dev
-   ```
-   Or build it and run the bundled version:
-   ```sh
-   npm run build
-   npx torlnk
-   ```
-
-Before opening a PR, skim [CONTRIBUTING.md](CONTRIBUTING.md); it lays out the bar with examples from real merged PRs.
+Based on [baairon/torlink](https://github.com/baairon/torlink) (MIT). Fixes that belong in both projects are welcome upstream.
 
 ## Privacy
 
-Your files stay on your disk, and nothing routes through a central server; torlink only talks to the torrent network directly. Once a download finishes it keeps seeding by default, sharing it back so the next person can find it just as easily. The network only works because people pass things along, and even a few minutes makes a real difference. If you'd rather not, opt out anytime: open the Seeding tab, press `p` to pause or stop any item, and press it again to pick it back up. Always your call.
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=baairon%2Ftorlink&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=baairon/torlink&type=date&theme=dark&legend=top-left&sealed_token=6RClUrW7A_foMjVMW-jdJ_bLj-wl8jtLiajry7T0uQ2F-UraDTQq4-n_hj9rdxkfW9Iqxekmz3p9eNLNUgZM18i04-fIvEYFHl-lz90OrCT5hhglY_qgSKoYh3IanPSjj8nUgVIMAGg6ZtPucVGVu-aCYcFzE3aertjFE4CPRDrO9dNaJKRxPFTH0clL" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=baairon/torlink&type=date&legend=top-left&sealed_token=6RClUrW7A_foMjVMW-jdJ_bLj-wl8jtLiajry7T0uQ2F-UraDTQq4-n_hj9rdxkfW9Iqxekmz3p9eNLNUgZM18i04-fIvEYFHl-lz90OrCT5hhglY_qgSKoYh3IanPSjj8nUgVIMAGg6ZtPucVGVu-aCYcFzE3aertjFE4CPRDrO9dNaJKRxPFTH0clL" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=baairon/torlink&type=date&legend=top-left&sealed_token=6RClUrW7A_foMjVMW-jdJ_bLj-wl8jtLiajry7T0uQ2F-UraDTQq4-n_hj9rdxkfW9Iqxekmz3p9eNLNUgZM18i04-fIvEYFHl-lz90OrCT5hhglY_qgSKoYh3IanPSjj8nUgVIMAGg6ZtPucVGVu-aCYcFzE3aertjFE4CPRDrO9dNaJKRxPFTH0clL" />
- </picture>
-</a>
+Nothing goes through our servers. torlink talks to trackers and peers directly. Completed torrents seed until you pause or stop them in the Seeding tab.

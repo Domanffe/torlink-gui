@@ -5,6 +5,7 @@ import {
   formatBytesPerSec,
   formatCount,
   formatRelative,
+  formatRelativeMs,
   formatEtaShort,
   cleanText,
   stripControl,
@@ -66,6 +67,16 @@ describe("formatRelative", () => {
     expect(formatRelative(now - 30)).toBe("now");
     expect(formatRelative(now - 125)).toBe("2m ago");
     expect(formatRelative(0)).toBe("");
+  });
+});
+
+describe("formatRelativeMs", () => {
+  it("accepts seconds or milliseconds", () => {
+    const nowSec = Date.now() / 1000;
+    const nowMs = Date.now();
+    expect(formatRelativeMs(nowSec - 30)).toBe("now");
+    expect(formatRelativeMs(nowMs - 30_000)).toBe("now");
+    expect(formatRelativeMs(0)).toBe("");
   });
 });
 

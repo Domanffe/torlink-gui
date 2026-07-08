@@ -6,13 +6,14 @@ import { SearchBar } from "./SearchBar";
 import { Panel } from "./Panel";
 import { Rule } from "./Rule";
 import { useConcurrentSearch } from "../hooks/useConcurrentSearch";
-import { getSource, SOURCES } from "../../sources/registry";
+import { SOURCES, getSourceMeta } from "../../sources/registry";
 import { stickCursor, wrapStep, windowStart, resultsPanelOuter } from "../move";
 import { sortResults, nextSort, sortLabel, sortArrow, type Sort, type SortField } from "../sort";
 import { filterResults } from "../filter";
 import { COLOR, GUTTER, ICON, sourceStyle } from "../theme";
 import { cleanText, formatBytes, formatCount, formatRelative, stripControl, truncate } from "../../util/format";
-import type { Source, TorrentResult } from "../../sources/types";
+import type { SourceMeta } from "../../sources/meta";
+import type { TorrentResult } from "../../sources/types";
 
 type Mode = "list" | "search" | "detail";
 
@@ -131,7 +132,7 @@ export function Results() {
   const results = useMemo(() => {
     const cat = CATEGORIES.find((c) => c.key === section);
     const base = cat?.group
-      ? search.results.filter((r) => getSource(r.source).group === cat.group)
+      ? search.results.filter((r) => getSourceMeta(r.source).group === cat.group)
       : search.results;
     return sortResults(filterResults(base, hideDead), sort);
   }, [search.results, section, sort, hideDead]);
@@ -277,7 +278,7 @@ export function Results() {
   );
   const numW = Math.max(2, String(results.length).length);
 
-  const outageCodes = (sources: readonly Source[]): string => {
+  const outageCodes = (sources: readonly SourceMeta[]): string => {
     const codes = [
       ...new Set(sources.map((s) => search.perSource[s.id]?.code).filter(Boolean)),
     ];
@@ -324,7 +325,7 @@ export function Results() {
       if (hideDead) {
         const cat = CATEGORIES.find((c) => c.key === section);
         const base = cat?.group
-          ? search.results.filter((r) => getSource(r.source).group === cat.group)
+          ? search.results.filter((r) => getSourceMeta(r.source).group === cat.group)
           : search.results;
         if (base.length > 0 && base.every((r) => r.seeders <= 0)) {
           return (

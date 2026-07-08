@@ -20,7 +20,7 @@ import type { SourceId } from "../sources/types";
  * A real seed never pulls data off the network: verifying on-disk files reads
  * the disk (network speed stays 0), only fetching *missing* data raises it. So
  * sustained network download on a "seed" means its files are gone or partial.
- * Size-agnostic (a 50 GB verify never trips it) and cross-platform (webtorrent
+ * Size-agnostic (a 50 GB verify never trips it) and cross-platform (the engine
  * owns the real on-disk paths, so we never guess sanitized filenames).
  */
 export function strayDownload(s: { total: number; progress: number; speed: number }): boolean {
@@ -29,7 +29,7 @@ export function strayDownload(s: { total: number; progress: number; speed: numbe
 
 const STRAY_TICKS = 2; // consecutive stray polls before flagging missing (~1s)
 
-// How long (ms) to let webtorrent verify on-disk pieces before the stray-download
+// How long (ms) to let the engine verify on-disk pieces before the stray-download
 // detector starts watching. Verification reads the disk and can briefly report
 // downloadSpeed > 0 / progress < 1, which is indistinguishable from a truly
 // missing file. 10 s covers most single-torrent verifications comfortably.
@@ -248,7 +248,7 @@ export class DownloadQueue extends EventEmitter {
       // it a couple of ticks (ignore a one-piece repair blip), then stop it and
       // flag missing, never re-download the whole thing.
       //
-      // Skip seeds still inside the grace period: webtorrent needs time to
+      // Skip seeds still inside the grace period: verification needs time to
       // hash-verify on-disk pieces, and during that window progress < 1 with
       // downloadSpeed > 0 is perfectly normal.
       const age = now - (this.seedStartedAt.get(sd.id) ?? 0);
@@ -384,7 +384,7 @@ export class DownloadQueue extends EventEmitter {
     };
 
     // Only hard guard we can make synchronously and portably: no magnet, no seed.
-    // We do NOT guess the on-disk path (webtorrent sanitizes names per-OS); we
+    // We do NOT guess the on-disk path (clients sanitize names per-OS); we
     // let it verify the real files and the poll safety-net flags a missing one.
     if (!h.magnet) {
       this.seeds.set(h.id, { ...base, status: "missing" });

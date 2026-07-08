@@ -70,6 +70,13 @@ export function formatRelative(unixSeconds?: number): string {
   return `${Math.floor(mo / 12)}y ago`;
 }
 
+/** Accepts unix seconds or milliseconds (values above ~1e12 are treated as ms). */
+export function formatRelativeMs(timestamp?: number): string {
+  if (!timestamp || !Number.isFinite(timestamp) || timestamp <= 0) return "";
+  const secs = timestamp > 1e12 ? Math.floor(timestamp / 1000) : timestamp;
+  return formatRelative(secs);
+}
+
 export function formatEtaShort(sec?: number): string {
   if (sec === undefined || !Number.isFinite(sec) || sec < 0) return "";
   const total = Math.round(sec);

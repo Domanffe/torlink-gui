@@ -1,7 +1,6 @@
-import { render } from "ink";
 import { parseCliArgs, HELP_TEXT } from "./cli/args";
 import { VERSION } from "./version";
-import { App } from "./ui/App";
+import { runTui } from "./tui";
 
 const cmd = parseCliArgs(process.argv.slice(2));
 
@@ -21,62 +20,13 @@ if (cmd.kind === "invalid") {
   process.exit(1);
 }
 
-// Enter the alt-screen and hide the hardware cursor: the TUI draws its own
-// cursor (the search field block, list pointers), so the terminal's should
-// stay hidden. restoreTerminal shows it again on exit.
-process.stdout.write("\x1b[?1049h\x1b[?25l\x1b[22;0t\x1b]0;torlink\x07");
-if (process.platform === "win32") process.title = "torlink";
-
-let restored = false;
-function restoreTerminal(): void {
-  if (restored) return;
-  restored = true;
-  process.stdout.write("\x1b[?1000l\x1b[?1006l\x1b[?25h\x1b[23;0t\x1b[?1049l");
+if (cmd.kind === "tui") {
+  runTui(cmd);
+} else if (cmd.kind === "search") {
+  const { startSearchServer } = await import("./sidecar/search-server.js");
+  await startSearchServer(Number(process.env.TORLINK_SEARCH_PORT ?? 3847));
+  process.stdout.write("Search sidecar running. Press Ctrl+C to stop.\n");
+} else {
+  const { runBrowserGui } = await import("./browser-gui.js");
+  await runBrowserGui();
 }
-
-let exiting = false;
-function forceExit(code = 0): void {
-  // Re-entry (e.g. ctrl-c after q): never get stuck, just leave now.
-  if (exiting) {
-    restoreTerminal();
-    process.exit(code);
-  }
-  exiting = true;
-  // Exit synchronously and unconditionally. State is already flushed
-  // (quitAll -> persistSync, and the unmount effect runs suspend()), so we never
-  // wait on webtorrent releasing its sockets; the OS reclaims them. Unmount
-  // first to restore raw mode, then our own terminal sequences, then go.
-  try {
-    app?.unmount();
-  } catch {}
-  restoreTerminal();
-  process.exit(code);
-}
-
-const app = render(
-  <App
-    initialMagnet={cmd.initialMagnet}
-    initialTorrent={cmd.initialTorrent}
-    onQuit={() => forceExit(0)}
-  />,
-  { exitOnCtrlC: false },
-);
-
-app
-  .waitUntilExit()
-  .then(() => forceExit(0))
-  .catch((err) => {
-    restoreTerminal();
-    console.error(err);
-    process.exit(1);
-  });
-
-process.on("SIGINT", () => forceExit(0));
-process.on("SIGTERM", () => forceExit(0));
-process.on("exit", restoreTerminal);
-
-process.on("uncaughtException", (err) => {
-  restoreTerminal();
-  console.error(err);
-  process.exit(1);
-});

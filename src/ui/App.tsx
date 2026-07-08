@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Box, Text, useApp, useInput, useStdout, useStdin } from "ink";
 import { promises as fs } from "node:fs";
-import { loadConfig, saveConfig, type Config } from "../config/config";
+import { saveConfig, type Config } from "../config/config";
 import { normalizeDownloadDir } from "../config/folder";
-import { DownloadQueue } from "../download/queue";
-import { loadQueue, loadSeeds } from "../download/persist";
-import { loadHistory } from "../download/history";
-import { reconcileQueue } from "../download/reconcile";
+import { bootApp } from "../core/boot";
+import type { DownloadQueue } from "../download/queue";
 import { parseInput } from "../sources/magnet";
 import { magnetFromTorrentFile } from "../sources/torrentFile";
 import { readClipboard, writeClipboard } from "../util/clipboard";
@@ -105,12 +103,7 @@ export function App({
     booting.current = true;
     let alive = true;
     void (async () => {
-      const cfg = await loadConfig();
-      const q = new DownloadQueue();
-      q.setTrackers(cfg.trackers);
-      q.restore(reconcileQueue(await loadQueue()));
-      q.restoreHistory(await loadHistory());
-      q.restoreSeeds(await loadSeeds());
+      const { config: cfg, queue: q } = await bootApp();
       if (!alive) {
         q.suspend();
         return;

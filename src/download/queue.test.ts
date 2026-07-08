@@ -30,7 +30,7 @@ describe("DownloadQueue seeding", () => {
   it("persistSync flushes every state file without touching the engine", () => {
     const q = new DownloadQueue();
     q.restoreHistory([h({ id: "h3" })]);
-    // No engine work, so this never spins up webtorrent and never throws even
+    // No engine work, so this never spins up the torrent engine and never throws even
     // with a populated history.
     expect(() => q.persistSync()).not.toThrow();
   });

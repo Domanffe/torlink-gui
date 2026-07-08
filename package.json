@@ -1,7 +1,7 @@
 {
   "name": "torlnk",
-  "version": "1.3.1",
-  "description": "A sleek, zero-setup torrent finder and downloader that lives right in your terminal.",
+  "version": "1.4.0",
+  "description": "A sleek torrent finder and downloader with a modern GUI (Tauri + librqbit).",
   "type": "module",
   "bin": {
     "torlnk": "./dist/cli.cjs"
@@ -15,14 +15,22 @@
   },
   "scripts": {
     "dev": "tsx src/index.tsx",
+    "dev:tui": "tsx src/index.tsx --tui",
+    "dev:gui": "vite",
+    "dev:search": "tsx scripts/dev-search.ts",
+    "dev:tauri": "tauri dev",
     "build": "tsup",
+    "build:gui": "vite build",
+    "build:sidecar": "tsup --config tsup.sidecar.config.ts",
+    "build:sidecar:bin": "node scripts/build-sidecar-bin.mjs",
+    "build:tauri": "tauri build",
     "postbuild": "node scripts/postbuild.cjs",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "verify:seeding": "tsx scripts/verify-seeding.ts",
     "previews": "tsx scripts/render-previews.tsx",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build && npm run build:gui && npm run build:sidecar"
   },
   "keywords": [
     "torrent",
@@ -32,7 +40,9 @@
     "magnet",
     "magnet-links",
     "p2p",
-    "webtorrent",
+    "librqbit",
+    "tauri",
+    "gui",
     "seeding",
     "tui",
     "terminal",
@@ -42,33 +52,39 @@
     "zero-setup",
     "fitgirl"
   ],
-  "author": "bairon",
+  "author": "Domanffe",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/baairon/torlink.git"
+    "url": "git+https://github.com/Domanffe/torlink.git"
   },
-  "homepage": "https://github.com/baairon/torlink#readme",
+  "homepage": "https://github.com/Domanffe/torlink#readme",
   "bugs": {
-    "url": "https://github.com/baairon/torlink/issues"
+    "url": "https://github.com/Domanffe/torlink/issues"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/plugin-dialog": "^2.3.0",
     "env-paths": "^4.0.0",
     "ink": "^7.0.5",
     "parse-torrent": "^11.0.21",
     "react": "^19.2.7",
-    "webtorrent": "^2.4.1"
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.10.1",
     "@types/node": "^25.9.2",
     "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
     "ink-testing-library": "^4.0.0",
     "tsup": "^8.5.1",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
+    "vite": "^7.3.1",
     "vitest": "^4.1.8"
   }
 }

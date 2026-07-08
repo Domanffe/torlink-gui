@@ -1,0 +1,173 @@
+//! Spawns and manages the Node search sidecar bundled with the desktop app.
+
+use std::time::Duration;
+
+use anyhow::{anyhow, Context};
+use tauri::AppHandle;
+use tauri_plugin_shell::process::{CommandChild, CommandEvent};
+use tauri_plugin_shell::ShellExt;
+use tracing::{info, warn};
+
+const DEFAULT_SEARCH_PORT: u16 = 3847;
+const PORT_PREFIX: &str = "search-sidecar-port:";
+
+pub struct SearchSidecar {
+    port: u16,
+    child: Option<CommandChild>,
+}
+
+impl SearchSidecar {
+    pub fn port(&self) -> u16 {
+        self.port
+    }
+
+    pub fn kill(&mut self) {
+        if let Some(child) = self.child.take() {
+            let _ = child.kill();
+        }
+    }
+}
+
+impl Drop for SearchSidecar {
+    fn drop(&mut self) {
+        self.kill();
+    }
+}
+
+/// Ensure the search API is reachable; spawn the bundled sidecar if needed.
+pub async fn ensure_search_sidecar(app: &AppHandle) -> anyhow::Result<SearchSidecar> {
+    if health_ok(DEFAULT_SEARCH_PORT).await {
+        info!(port = DEFAULT_SEARCH_PORT, "search sidecar already running");
+        return Ok(SearchSidecar {
+            port: DEFAULT_SEARCH_PORT,
+            child: None,
+        });
+    }
+
+    match spawn_bundled_sidecar(app).await {
+        Ok(sidecar) => Ok(sidecar),
+        Err(e) => {
+            warn!("bundled sidecar failed: {e:#}");
+            #[cfg(debug_assertions)]
+            {
+                spawn_node_fallback(app).await
+            }
+            #[cfg(not(debug_assertions))]
+            {
+                Err(e)
+            }
+        }
+    }
+}
+
+async fn spawn_bundled_sidecar(app: &AppHandle) -> anyhow::Result<SearchSidecar> {
+    let sidecar = app
+        .shell()
+        .sidecar("search-sidecar")
+        .context("search-sidecar binary not bundled (run npm run build:sidecar:bin)")?;
+
+    let (mut rx, child) = sidecar
+        .spawn()
+        .context("failed to spawn search-sidecar process")?;
+
+    let port = tokio::time::timeout(Duration::from_secs(45), async {
+        while let Some(event) = rx.recv().await {
+            match event {
+                CommandEvent::Stdout(line) => {
+                    let text = String::from_utf8_lossy(&line);
+                    for l in text.lines() {
+                        if let Some(p) = l.strip_prefix(PORT_PREFIX) {
+                            let port: u16 = p.trim().parse().context("invalid sidecar port")?;
+                            return Ok(port);
+                        }
+                    }
+                }
+                CommandEvent::Stderr(line) => {
+                    let text = String::from_utf8_lossy(&line);
+                    if !text.trim().is_empty() {
+                        tracing::debug!(target: "search-sidecar", "{}", text.trim());
+                    }
+                }
+                CommandEvent::Error(err) => return Err(anyhow!("sidecar error: {err}")),
+                CommandEvent::Terminated(payload) => {
+                    return Err(anyhow!(
+                        "sidecar exited before ready (code {:?})",
+                        payload.code
+                    ));
+                }
+                _ => {}
+            }
+        }
+        Err(anyhow!("sidecar closed stdout without reporting port"))
+    })
+    .await
+    .context("timed out waiting for search sidecar")??;
+
+    // Wait until HTTP is actually up (pkg/node startup can lag behind stdout).
+    for _ in 0..50 {
+        if health_ok(port).await {
+            info!(port, "search sidecar ready");
+            return Ok(SearchSidecar {
+                port,
+                child: Some(child),
+            });
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+
+    let _ = child.kill();
+    Err(anyhow!("search sidecar port {port} did not respond to /health"))
+}
+
+#[cfg(debug_assertions)]
+async fn spawn_node_fallback(app: &AppHandle) -> anyhow::Result<SearchSidecar> {
+    let manifest = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    let js = manifest
+        .parent()
+        .context("project root")?
+        .join("dist")
+        .join("search-sidecar.cjs");
+
+    if !js.exists() {
+        return Err(anyhow!(
+            "no search sidecar: run `npm run dev:search` or `npm run build:sidecar`"
+        ));
+    }
+
+    info!(path = %js.display(), "spawning node search sidecar (dev fallback)");
+
+    let (mut rx, child) = app
+        .shell()
+        .command("node")
+        .args([js.to_string_lossy().to_string()])
+        .spawn()
+        .context("failed to spawn node sidecar")?;
+
+    let port = tokio::time::timeout(Duration::from_secs(30), async {
+        while let Some(event) = rx.recv().await {
+            if let CommandEvent::Stdout(line) = event {
+                let text = String::from_utf8_lossy(&line);
+                for l in text.lines() {
+                    if let Some(p) = l.strip_prefix(PORT_PREFIX) {
+                        return Ok(p.trim().parse::<u16>()?);
+                    }
+                }
+            }
+        }
+        Err(anyhow!("node sidecar exited before ready"))
+    })
+    .await??;
+
+    Ok(SearchSidecar {
+        port,
+        child: Some(child),
+    })
+}
+
+async fn health_ok(port: u16) -> bool {
+    let url = format!("http://127.0.0.1:{port}/health");
+    match reqwest::get(&url).await {
+        Ok(resp) => resp.status().is_success(),
+        Err(_) => false,
+    }
+}

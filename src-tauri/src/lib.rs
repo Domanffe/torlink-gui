@@ -1,0 +1,135 @@
+mod config;
+mod persistence;
+mod sidecar;
+mod torrent;
+
+use std::sync::Arc;
+
+use tauri::{
+    menu::{Menu, MenuItem},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    Manager, RunEvent, WindowEvent,
+};
+use tokio::sync::Mutex;
+
+use torrent::TorrentManager;
+
+pub struct AppState {
+    pub torrents: Arc<Mutex<TorrentManager>>,
+    pub search: Mutex<sidecar::SearchSidecar>,
+}
+
+fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
+    let show = MenuItem::with_id(app, "show", "Show torlink", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+    let menu = Menu::with_items(app, &[&show, &quit])?;
+
+    let icon = app
+        .default_window_icon()
+        .cloned()
+        .ok_or_else(|| tauri::Error::FailedToReceiveMessage)?;
+
+    TrayIconBuilder::with_id("main")
+        .icon(icon)
+        .tooltip("torlink")
+        .menu(&menu)
+        .show_menu_on_left_click(false)
+        .on_menu_event(|app, event| match event.id.as_ref() {
+            "quit" => app.exit(0),
+            "show" => {
+                if let Some(w) = app.get_webview_window("main") {
+                    let _ = w.show();
+                    let _ = w.set_focus();
+                }
+            }
+            _ => {}
+        })
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
+                let app = tray.app_handle();
+                if let Some(w) = app.get_webview_window("main") {
+                    let _ = w.show();
+                    let _ = w.set_focus();
+                }
+            }
+        })
+        .build(app)?;
+
+    Ok(())
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "info".into()),
+        )
+        .init();
+
+    let _ = librqbit::try_increase_nofile_limit();
+
+    tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            setup_tray(app)?;
+
+            let handle = app.handle().clone();
+            let (search, manager) = tauri::async_runtime::block_on(async {
+                let search = sidecar::ensure_search_sidecar(&handle).await?;
+                let manager = TorrentManager::boot(handle.clone(), search.port()).await?;
+                Ok::<_, anyhow::Error>((search, manager))
+            })
+            .expect("failed to boot torlink");
+
+            app.manage(AppState {
+                torrents: manager,
+                search: Mutex::new(search),
+            });
+
+            if let Some(window) = app.get_webview_window("main") {
+                let w = window.clone();
+                window.on_window_event(move |event| {
+                    if let WindowEvent::CloseRequested { api, .. } = event {
+                        api.prevent_close();
+                        let _ = w.hide();
+                    }
+                });
+                let _ = window.show();
+            }
+
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            torrent::commands::get_config,
+            torrent::commands::set_config,
+            torrent::commands::torrent_add,
+            torrent::commands::torrent_list,
+            torrent::commands::torrent_pause,
+            torrent::commands::torrent_resume,
+            torrent::commands::torrent_remove,
+            torrent::commands::torrent_retry,
+            torrent::commands::torrent_remove_history,
+            torrent::commands::torrent_clear_history,
+            torrent::commands::torrent_set_trackers,
+            torrent::commands::get_search_port,
+            torrent::commands::get_version,
+        ])
+        .build(tauri::generate_context!())
+        .expect("error building torlink")
+        .run(|app, event| {
+            if matches!(event, RunEvent::Exit) {
+                if let Some(state) = app.try_state::<AppState>() {
+                    if let Ok(mut search) = state.search.try_lock() {
+                        search.kill();
+                    }
+                }
+            }
+        });
+}
