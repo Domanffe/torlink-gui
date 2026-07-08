@@ -1,13 +1,15 @@
 import { Card } from "../components/Card";
-import { formatBytes, formatBytesPerSec, truncate } from "../../util/format";
+import { truncate } from "../../util/format";
 import type { SeedItem } from "../hooks/useTorrents";
 import { useTorrents } from "../hooks/useTorrents";
+import { useFormat } from "../hooks/useFormat";
 import { useLocale } from "../i18n/LocaleProvider";
 import { UploadIcon, UiIcon } from "../icons";
 import { confirmCancelDownload } from "../util/confirm";
 
 export function SeedingView() {
   const { t, messages } = useLocale();
+  const fmt = useFormat();
   const { list, pause, resume, remove } = useTorrents();
   const items = list.seeds;
   const confirm = messages.confirm;
@@ -36,15 +38,15 @@ export function SeedingView() {
                     <UiIcon icon={UploadIcon} size={17} />
                   </span>
                   <span className="download-name">{truncate(it.name, 48)}</span>
-                  <span className="download-meta">{formatBytes(it.sizeBytes)}</span>
+                  <span className="download-meta">{fmt.bytes(it.sizeBytes)}</span>
                 </div>
                 <div className="download-stats">
                   {paused ? (
                     <span className="muted">{t("seeding.paused")}</span>
                   ) : (
                     <>
-                      <span>{formatBytesPerSec(it.uploadSpeed)}</span>
-                      <span>· {t("seeding.uploaded", { amount: formatBytes(it.uploaded) })}</span>
+                      <span>{fmt.bytesPerSec(it.uploadSpeed)}</span>
+                      <span>· {t("seeding.uploaded", { amount: fmt.bytes(it.uploaded) })}</span>
                       <span>· {t("seeding.peers", { count: it.peers })}</span>
                     </>
                   )}

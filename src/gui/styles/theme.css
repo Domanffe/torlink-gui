@@ -553,11 +553,10 @@ textarea {
 }
 
 .progress-track {
-  height: 6px;
+  height: 4px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   overflow: hidden;
-  margin: 0.35rem 0;
 }
 
 .progress-track--paused .progress-thumb {
@@ -569,6 +568,141 @@ textarea {
   background: linear-gradient(90deg, var(--accent), var(--bright));
   border-radius: 999px;
   transition: width 0.35s ease;
+}
+
+.torrent-progress {
+  margin: 0.35rem 0;
+}
+
+.torrent-progress--paused .piece-cell--active {
+  animation: none;
+  background: #5c5868;
+}
+
+.piece-map {
+  display: flex;
+  gap: 1px;
+  height: 10px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  margin-bottom: 0.25rem;
+}
+
+.piece-cell {
+  flex: 1;
+  min-width: 0;
+  border-radius: 1px;
+  transition: background 0.2s ease;
+}
+
+.piece-cell--pending {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.piece-cell--active {
+  background: linear-gradient(90deg, var(--accent), var(--bright));
+  animation: piece-pulse 1.4s ease-in-out infinite;
+}
+
+.piece-cell--partial {
+  background: rgba(168, 130, 255, 0.4);
+}
+
+.piece-cell--done {
+  background: var(--accent);
+  opacity: 0.9;
+}
+
+@keyframes piece-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.source-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+  padding: 0.1rem 0;
+}
+
+.source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  transition: border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.source-chip-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.35;
+}
+
+.source-chip-tag {
+  color: var(--chip-color, var(--muted));
+}
+
+.source-chip--loading {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.source-chip--loading .source-chip-dot {
+  opacity: 1;
+  background: var(--chip-color, var(--accent));
+  animation: source-pulse 1s ease-in-out infinite;
+}
+
+.source-chip--done {
+  opacity: 0.85;
+}
+
+.source-chip--done .source-chip-dot {
+  opacity: 1;
+  background: var(--chip-color, var(--good));
+}
+
+.source-chip--error {
+  border-color: rgba(244, 114, 138, 0.35);
+  opacity: 0.9;
+}
+
+.source-chip--error .source-chip-dot {
+  opacity: 1;
+  background: var(--bad);
+}
+
+.source-chip--error .source-chip-tag {
+  color: var(--bad);
+  opacity: 0.9;
+}
+
+@keyframes source-pulse {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
 }
 
 .download-stats {

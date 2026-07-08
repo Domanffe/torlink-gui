@@ -1,6 +1,23 @@
-export function formatBytes(bytes?: number): string {
-  if (bytes === undefined || !Number.isFinite(bytes) || bytes <= 0) return "0 B";
-  const units = ["B", "KB", "MB", "GB", "TB"];
+export type FormatLocale = "en" | "ru";
+
+function loc(locale?: FormatLocale): FormatLocale {
+  return locale === "ru" ? "ru" : "en";
+}
+
+const BYTE_UNITS: Record<FormatLocale, string[]> = {
+  en: ["B", "KB", "MB", "GB", "TB"],
+  ru: ["Б", "КБ", "МБ", "ГБ", "ТБ"],
+};
+
+const RATE_UNITS: Record<FormatLocale, string[]> = {
+  en: ["B/s", "KB/s", "MB/s", "GB/s"],
+  ru: ["Б/с", "КБ/с", "МБ/с", "ГБ/с"],
+};
+
+export function formatBytes(bytes?: number, locale?: FormatLocale): string {
+  const L = loc(locale);
+  const units = BYTE_UNITS[L];
+  if (bytes === undefined || !Number.isFinite(bytes) || bytes <= 0) return `0 ${units[0]}`;
   let n = bytes;
   let i = 0;
   while (n >= 1024 && i < units.length - 1) {
@@ -28,9 +45,10 @@ export function parseSize(s: string): number {
   return Math.round(parseFloat(m[1]!) * (SIZE_UNITS[m[2]!.toUpperCase()] ?? 1));
 }
 
-export function formatBytesPerSec(bytes?: number): string {
+export function formatBytesPerSec(bytes?: number, locale?: FormatLocale): string {
+  const L = loc(locale);
+  const units = RATE_UNITS[L];
   if (bytes === undefined || !Number.isFinite(bytes) || bytes <= 0) return "";
-  const units = ["B/s", "KB/s", "MB/s", "GB/s"];
   let n = bytes;
   let i = 0;
   while (n >= 1024 && i < units.length - 1) {
@@ -49,41 +67,57 @@ export function formatCount(n: number): string {
   return m < 10 ? `${m.toFixed(1).replace(/\.0$/, "")}m` : `${Math.round(m)}m`;
 }
 
-export function formatRelative(unixSeconds?: number): string {
+export function formatRelative(unixSeconds?: number, locale?: FormatLocale): string {
   if (!unixSeconds || !Number.isFinite(unixSeconds) || unixSeconds <= 0) return "";
   const diff = Date.now() / 1000 - unixSeconds;
-  if (diff < 60) return "now";
+  const L = loc(locale);
+  if (diff < 60) return L === "ru" ? "только что" : "now";
   const m = Math.floor(diff / 60);
-  if (m < 60) return `${m}m ago`;
+  if (m < 60) return L === "ru" ? `${m} мин назад` : `${m}m ago`;
   const h = Math.floor(m / 60);
   if (h < 24) {
     const rm = m % 60;
+    if (L === "ru") {
+      return rm > 0 ? `${h} ч ${rm} мин назад` : `${h} ч назад`;
+    }
     return rm > 0 ? `${h}hr ${rm}m ago` : `${h}hr ago`;
   }
   const d = Math.floor(h / 24);
   if (d < 30) {
     const rh = h % 24;
+    if (L === "ru") {
+      return rh > 0 ? `${d} дн ${rh} ч назад` : `${d} дн назад`;
+    }
     return rh > 0 ? `${d}d ${rh}hr ago` : `${d}d ago`;
   }
   const mo = Math.floor(d / 30);
-  if (mo < 12) return `${mo}mo ago`;
-  return `${Math.floor(mo / 12)}y ago`;
+  if (mo < 12) return L === "ru" ? `${mo} мес назад` : `${mo}mo ago`;
+  const y = Math.floor(mo / 12);
+  return L === "ru" ? `${y} г назад` : `${y}y ago`;
 }
 
 /** Accepts unix seconds or milliseconds (values above ~1e12 are treated as ms). */
-export function formatRelativeMs(timestamp?: number): string {
+export function formatRelativeMs(timestamp?: number, locale?: FormatLocale): string {
   if (!timestamp || !Number.isFinite(timestamp) || timestamp <= 0) return "";
   const secs = timestamp > 1e12 ? Math.floor(timestamp / 1000) : timestamp;
-  return formatRelative(secs);
+  return formatRelative(secs, locale);
 }
 
-export function formatEtaShort(sec?: number): string {
+export function formatEtaShort(sec?: number, locale?: FormatLocale): string {
   if (sec === undefined || !Number.isFinite(sec) || sec < 0) return "";
+  const L = loc(locale);
   const total = Math.round(sec);
   const d = Math.floor(total / 86400);
   const h = Math.floor((total % 86400) / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
+  if (L === "ru") {
+    if (d > 0)
+      return [`${d} д`, h > 0 ? `${h} ч` : "", m > 0 ? `${m} мин` : ""].filter(Boolean).join(" ");
+    if (h > 0) return m > 0 ? `${h} ч ${m} мин` : `${h} ч`;
+    if (m > 0) return s > 0 ? `${m} мин ${s} с` : `${m} мин`;
+    return `${s} с`;
+  }
   if (d > 0)
     return [`${d}d`, h > 0 ? `${h}hr` : "", m > 0 ? `${m}m` : ""]
       .filter(Boolean)

@@ -80,6 +80,27 @@ describe("formatRelativeMs", () => {
   });
 });
 
+describe("formatRelativeMs (ru)", () => {
+  it("formats in Russian", () => {
+    const nowSec = Date.now() / 1000;
+    expect(formatRelativeMs(nowSec - 30, "ru")).toBe("только что");
+    expect(formatRelativeMs(nowSec - 125, "ru")).toBe("2 мин назад");
+  });
+});
+
+describe("formatBytes (ru)", () => {
+  it("uses Cyrillic units", () => {
+    expect(formatBytes(2.1e9, "ru")).toBe("1.96 ГБ");
+  });
+});
+
+describe("formatEtaShort (ru)", () => {
+  it("formats remaining time in Russian", () => {
+    expect(formatEtaShort(45, "ru")).toBe("45 с");
+    expect(formatEtaShort(125, "ru")).toBe("2 мин 5 с");
+  });
+});
+
 describe("formatEtaShort", () => {
   it("formats remaining time compactly", () => {
     expect(formatEtaShort(45)).toBe("45s");

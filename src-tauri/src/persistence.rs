@@ -22,6 +22,12 @@ pub enum SeedStatus {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PieceMap {
+    pub total: u32,
+    pub states: Vec<u8>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QueueItem {
     pub id: String,
     pub name: String,
@@ -43,6 +49,8 @@ pub struct QueueItem {
     pub files: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
+    #[serde(rename = "pieceMap", skip_serializing_if = "Option::is_none")]
+    pub piece_map: Option<PieceMap>,
     #[serde(rename = "addedAt")]
     pub added_at: u64,
 }

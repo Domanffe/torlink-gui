@@ -1,16 +1,11 @@
 import { useEffect } from "react";
 import { Card } from "../components/Card";
-import { ProgressBar } from "../components/ProgressBar";
-import {
-  formatBytes,
-  formatBytesPerSec,
-  formatEtaShort,
-  formatRelativeMs,
-  truncate,
-} from "../../util/format";
+import { TorrentProgress } from "../components/TorrentProgress";
+import { truncate } from "../../util/format";
 import { sourceStyle } from "../../ui/theme";
 import type { HistoryItem, QueueItem } from "../hooks/useTorrents";
 import { useTorrents } from "../hooks/useTorrents";
+import { useFormat } from "../hooks/useFormat";
 import { useLocale } from "../i18n/LocaleProvider";
 import {
   BatteryPauseIcon,
@@ -30,6 +25,7 @@ function isPaused(it: QueueItem): boolean {
 
 export function DownloadsView() {
   const { t, messages } = useLocale();
+  const fmt = useFormat();
   const { list, addDownload, pause, resume, retry, remove, removeHistory, clearHistory } =
     useTorrents();
   const items = list.downloads;
@@ -99,7 +95,7 @@ export function DownloadsView() {
                     </span>
                     <span className="download-name">{truncate(it.name, 48)}</span>
                     <span className="download-meta">
-                      {formatBytes(it.totalBytes)}
+                      {fmt.bytes(it.totalBytes)}
                       {ss && (
                         <span className="tag" style={{ color: ss.color }}>
                           {ss.tag}
@@ -107,7 +103,7 @@ export function DownloadsView() {
                       )}
                     </span>
                   </div>
-                  <ProgressBar pct={it.progress} paused={paused || failed} />
+                  <TorrentProgress pct={it.progress} paused={paused || failed} pieceMap={it.pieceMap} />
                   {it.error && <p className="download-error">{it.error}</p>}
                   <div className="download-stats">
                     {failed ? (
@@ -121,10 +117,10 @@ export function DownloadsView() {
                     ) : (
                       <>
                         <span>{it.progress}%</span>
-                        <span>{formatBytesPerSec(it.speed) || "…"}</span>
+                        <span>{fmt.bytesPerSec(it.speed) || "…"}</span>
                         <span>· {t("downloads.peers", { count: it.peers })}</span>
                         {it.eta != null && it.eta > 0 && (
-                          <span>· {formatEtaShort(it.eta)}</span>
+                          <span>· {fmt.eta(it.eta)}</span>
                         )}
                       </>
                     )}
@@ -171,13 +167,13 @@ export function DownloadsView() {
                     <div className="history-main">
                       <span className="history-name">{truncate(h.name, 52)}</span>
                       <span className="history-meta">
-                        {formatBytes(h.sizeBytes)}
+                        {fmt.bytes(h.sizeBytes)}
                         {ss && (
                           <span className="tag" style={{ color: ss.color }}>
                             {ss.tag}
                           </span>
                         )}
-                        <span className="muted">· {formatRelativeMs(h.completedAt)}</span>
+                        <span className="muted">· {fmt.relativeMs(h.completedAt)}</span>
                       </span>
                     </div>
                     <div className="download-actions">

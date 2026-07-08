@@ -26,6 +26,7 @@ export interface QueueItem {
   peers: number;
   eta?: number;
   error?: string;
+  pieceMap?: { total: number; states: number[] };
 }
 
 export interface SeedItem {

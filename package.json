@@ -1,6 +1,6 @@
 {
   "name": "torlnk",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "A sleek torrent finder and downloader with a modern GUI (Tauri + librqbit).",
   "type": "module",
   "bin": {
@@ -73,6 +73,8 @@
   "dependencies": {
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-dialog": "^2.3.0",
+    "@tauri-apps/plugin-process": "^2.3.0",
+    "@tauri-apps/plugin-updater": "^2.9.0",
     "env-paths": "^4.0.0",
     "ink": "^7.0.5",
     "motion": "^12.42.2",

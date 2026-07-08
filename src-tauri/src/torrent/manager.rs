@@ -13,7 +13,7 @@ use tracing::warn;
 use crate::config::{ensure_dirs, load_config, save_config, AppConfig, Paths};
 use crate::persistence::{
     load_history, load_queue, load_seeds, save_history, save_queue, save_seeds, torrent_meta_path,
-    DownloadStatus, HistoryItem, QueueItem, SeedItem, SeedRecord, SeedStatus,
+    DownloadStatus, HistoryItem, PieceMap, QueueItem, SeedItem, SeedRecord, SeedStatus,
 };
 
 const HISTORY_MAX: usize = 500;
@@ -53,6 +53,65 @@ fn norm_hash(id: &str) -> String {
 
 fn mbps_to_bytes(mbps: f64) -> u64 {
     (mbps * 1024.0 * 1024.0) as u64
+}
+
+fn parse_bitfield_dump(s: &str) -> Option<Vec<bool>> {
+    if !s.contains("true") && !s.contains("false") {
+        return None;
+    }
+    let mut out = Vec::new();
+    for token in s.split(|c: char| c == ',' || c == '[' || c == ']' || c.is_whitespace()) {
+        match token.trim() {
+            "true" => out.push(true),
+            "false" => out.push(false),
+            _ => {}
+        }
+    }
+    if out.is_empty() {
+        None
+    } else {
+        Some(out)
+    }
+}
+
+fn build_piece_map(api: &Api, hash: &str, downloading: bool) -> Option<PieceMap> {
+    let id = torrent_id(hash).ok()?;
+    let dump = api.api_dump_haves(id).ok()?;
+    let have = parse_bitfield_dump(&dump)?;
+    let total = have.len();
+    if total == 0 {
+        return None;
+    }
+    const MAX_BUCKETS: usize = 96;
+    let buckets = total.min(MAX_BUCKETS);
+    let mut states = Vec::with_capacity(buckets);
+    let mut first_gap: Option<usize> = None;
+    for b in 0..buckets {
+        let start = (b * total) / buckets;
+        let end = ((b + 1) * total) / buckets;
+        let len = end.saturating_sub(start).max(1);
+        let have_count = have[start..end].iter().filter(|&&h| h).count();
+        let st = if have_count >= len {
+            2u8
+        } else if have_count > 0 {
+            3u8
+        } else {
+            0u8
+        };
+        if st != 2 && first_gap.is_none() {
+            first_gap = Some(b);
+        }
+        states.push(st);
+    }
+    if downloading {
+        if let Some(b) = first_gap {
+            states[b] = 1;
+        }
+    }
+    Some(PieceMap {
+        total: total as u32,
+        states,
+    })
 }
 
 impl TorrentManager {
@@ -295,6 +354,7 @@ impl TorrentManager {
             eta: None,
             files: None,
             error: None,
+            piece_map: None,
             added_at: now_ms(),
         };
 
@@ -512,6 +572,11 @@ impl TorrentManager {
                 q.speed = down_speed;
                 q.peers = peers;
                 q.eta = eta;
+                if q.status == DownloadStatus::Downloading {
+                    q.piece_map = build_piece_map(&self.api, &hash, down_speed > 0);
+                } else {
+                    q.piece_map = None;
+                }
                 if stats.finished && q.status == DownloadStatus::Downloading {
                     finished.push(hash.clone());
                 }

@@ -23,6 +23,8 @@ desktop.ini
 .env
 .env.*
 !.env.example
+src-tauri/.updater-key.pem
+src-tauri/.updater-key.pem.pub
 
 # Logs & diagnostics
 *.log

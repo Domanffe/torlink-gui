@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import type { AppConfig } from "../hooks/useTorrents";
+import { useTorrents } from "../hooks/useTorrents";
+import { useUpdater } from "../hooks/useUpdater";
 import { useLocale } from "../i18n/LocaleProvider";
+import { format } from "../i18n/locale";
 import type { LocalePref } from "../i18n/locale";
 import { useToast } from "./Toast";
 import { errMsg } from "../util/errors";
@@ -19,6 +22,8 @@ export function SettingsSheet({
   onSaved: () => void;
 }) {
   const { t, localePref, setLocalePref } = useLocale();
+  const { tauri } = useTorrents();
+  const { checking, updateVersion, checkForUpdate } = useUpdater(tauri);
   const { toast } = useToast();
   const [downloadDir, setDownloadDir] = useState("");
   const [trackersText, setTrackersText] = useState("");
@@ -89,6 +94,41 @@ export function SettingsSheet({
               <option value="ru">{t("settings.languageRu")}</option>
             </select>
           </label>
+
+          {tauri && (
+            <div className="field">
+              <span className="field-label">{t("settings.updates")}</span>
+              {updateVersion ? (
+                <p className="field-hint">{format(t("settings.updateAvailable"), { version: updateVersion })}</p>
+              ) : null}
+              <div className="field-row">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  disabled={checking}
+                  onClick={() =>
+                    void (async () => {
+                      const ver = await checkForUpdate(false);
+                      if (ver) return;
+                      toast(t("settings.upToDate"), "success");
+                    })()
+                  }
+                >
+                  {checking ? t("settings.checkingUpdates") : t("settings.checkUpdates")}
+                </button>
+                {updateVersion && (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={checking}
+                    onClick={() => void checkForUpdate(true)}
+                  >
+                    {t("settings.installUpdate")}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           <label className="field">
             <span className="field-label">{t("settings.downloadFolder")}</span>

@@ -3,6 +3,7 @@ import type { Section } from "../App";
 import { SettingsSheet } from "../components/SettingsSheet";
 import { Sidebar } from "../components/Sidebar";
 import { Wordmark } from "../components/Wordmark";
+import { check } from "@tauri-apps/plugin-updater";
 import { useTorrents } from "../hooks/useTorrents";
 import { useLocale } from "../i18n/LocaleProvider";
 import { GearIcon, UiIcon } from "../icons";
@@ -26,9 +27,15 @@ export function Shell({
   const { t } = useLocale();
   const [section, setSection] = useState<Section>(initialSection);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const { list, config, refreshConfig } = useTorrents();
+  const { list, config, refreshConfig, tauri } = useTorrents();
   const activeDl = list.downloads.filter((d) => d.status === "downloading").length;
   const activeSeed = list.seeds.filter((s) => s.status === "seeding").length;
+
+  useEffect(() => {
+    if (!tauri) return;
+    const timer = window.setTimeout(() => void check().catch(() => {}), 4000);
+    return () => window.clearTimeout(timer);
+  }, [tauri]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {

@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Section } from "../App";
 import { Card } from "../components/Card";
+import { SearchSourceStrip } from "../components/SearchSourceStrip";
 import { getSourceMeta } from "../../sources/meta";
 import type { TorrentResult } from "../../sources/types";
-import { formatBytes, formatCount, truncate } from "../../util/format";
+import { formatCount, truncate } from "../../util/format";
 import { sourceStyle } from "../../ui/theme";
 import { CATEGORY_GROUP } from "../sections";
 import { useSearch, useSearchPort } from "../hooks/useSearch";
 import { useTorrents } from "../hooks/useTorrents";
+import { useFormat } from "../hooks/useFormat";
 import { useLocale } from "../i18n/LocaleProvider";
 import { MagnifierIcon, UiIcon } from "../icons";
 
@@ -19,6 +21,7 @@ export function SearchView({
   initialQuery?: string;
 }) {
   const { t } = useLocale();
+  const fmt = useFormat();
   const [input, setInput] = useState(initialQuery);
   const [activeQuery, setActiveQuery] = useState<string | null>(initialQuery.trim() || null);
   const [selected, setSelected] = useState<TorrentResult | null>(null);
@@ -88,7 +91,7 @@ export function SearchView({
           </div>
           <dl className="detail-grid">
             <dt>{t("search.size")}</dt>
-            <dd>{formatBytes(selected.sizeBytes)}</dd>
+            <dd>{fmt.bytes(selected.sizeBytes)}</dd>
             <dt>{t("search.health")}</dt>
             <dd>
               {t("search.seedersLeechers", {
@@ -126,6 +129,12 @@ export function SearchView({
           placeholder={t("search.placeholder")}
         />
       </div>
+
+      <SearchSourceStrip
+        perSource={search.perSource}
+        category={category}
+        active={!!activeQuery}
+      />
 
       <Card
         title={t("search.results")}
@@ -171,7 +180,7 @@ export function SearchView({
                   >
                     <td className="col-idx">{i + 1}</td>
                     <td className="col-name">{truncate(r.name, 56)}</td>
-                    <td className="col-size">{formatBytes(r.sizeBytes)}</td>
+                    <td className="col-size">{fmt.bytes(r.sizeBytes)}</td>
                     <td className="col-health">
                       <span className={r.seeders > 0 ? "good" : ""}>
                         {formatCount(r.seeders)}:{formatCount(r.leechers)}

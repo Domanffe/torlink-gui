@@ -15,7 +15,7 @@ jobs:
         include:
           - platform: windows-latest
             args: ""
-          - platform: ubuntu-latest
+          - platform: ubuntu-22.04
             args: ""
           - platform: macos-latest
             args: ""
@@ -32,7 +32,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Install Linux dependencies
-        if: matrix.platform == 'ubuntu-latest'
+        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
@@ -40,19 +40,26 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
-      - name: Build GUI and sidecar
-        run: |
-          npm run build:gui
-          npm run build:sidecar
-          npm run build:sidecar:bin
-
-      - name: Build Tauri app
+      - name: Build Tauri (CI / PR)
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         run: npm run build:tauri -- ${{ matrix.args }}
         env:
           CI: true
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Build and attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         with:
-          name: torlink-${{ matrix.platform }}
-          path: src-tauri/target/release/bundle/
+          tagName: ${{ github.ref_name }}
+          releaseName: torlink ${{ github.ref_name }}
+          releaseBody: |
+            Desktop installers for Windows, Linux, and macOS.
+            Auto-update bundles are included when signing key is configured.
+          releaseDraft: false
+          prerelease: false
+          uploadUpdaterJson: true
+          updaterJsonPreferNsis: true
+          args: ${{ matrix.args }}
