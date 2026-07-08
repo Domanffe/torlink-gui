@@ -52,7 +52,7 @@ Games are limited to FitGirl on purpose. If a source is down, the rest still ans
 
 ## Upstream
 
-Based on [baairon/torlink](https://github.com/baairon/torlink) (MIT). We track their **search source adapters** occasionally; see [docs/upstream.md](docs/upstream.md). No plans to merge GUI back upstream.
+Based on [baairon/torlink](https://github.com/baairon/torlink) (MIT). Search adapters are occasionally synced from upstream — see [docs/upstream.md](docs/upstream.md).
 
 ## Privacy
 

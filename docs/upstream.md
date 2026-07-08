@@ -1,20 +1,19 @@
 # Синхронизация с upstream
 
-Форк **torlink-gui** — desktop (Tauri + librqbit).  
-[baairon/torlink](https://github.com/baairon/torlink) — TUI + WebTorrent, GUI у них не планируется.
+**torlink-gui** — desktop (Tauri + librqbit).  
+[baairon/torlink](https://github.com/baairon/torlink) — TUI + WebTorrent.
 
-Связь односторонняя: **смотрим upstream → переносим к себе вручную или cherry-pick**. PR в оригинал не делаем.
+Связь односторонняя: смотрим их репозиторий, переносим к себе то, что нужно. Обратно в оригинал ничего не отправляем — у нас другой продукт.
 
-## Что синхронизировать
+## Что брать
 
-| Брать из upstream | Не трогать |
+| Из upstream | Оставить только у нас |
 | --- | --- |
 | `src/sources/**` | `src-tauri/`, `src/gui/` |
-| тесты `src/sources/*.test.ts` | `src/ui/` (Ink TUI) |
-| иногда `src/util/format.ts` | `src/download/engine.ts` (у них WebTorrent) |
-| | `package.json` scripts под TUI |
+| `src/sources/*.test.ts` | `src/ui/` (Ink) |
+| иногда `src/util/format.ts` | `src/download/engine.ts` |
 
-У нас поверх источников свои слои: `meta.ts`, lazy `registry.ts`, `core/search.ts`, sidecar, Rust. После переноса фикса адаптера проверь, что sidecar и GUI search всё ещё работают (`npm test`, `npm run dev:tauri`).
+Поверх адаптеров у нас свои слои: `meta.ts`, lazy `registry.ts`, `core/search.ts`, sidecar, Rust. После переноса фикса — `npm test` и быстрый поиск в dev.
 
 ## Remote
 
@@ -30,36 +29,26 @@ git remote -v
 git remote add upstream https://github.com/baairon/torlink.git
 ```
 
-## Регулярная проверка
+## Проверка
 
 ```sh
-npm run sync:check          # отчёт без fetch
-npm run sync:check -- --fetch   # сначала git fetch upstream
+npm run sync:check
+npm run sync:check -- --fetch   # с git fetch upstream
 ```
 
-Скрипт покажет:
+Покажет новые коммиты upstream в зоне sources, diff и наши отличия.
 
-- коммиты в upstream по `src/sources/`, которых нет у нас;
-- diff по зоне синхронизации;
-- наши локальные изменения в той же зоне (чтобы не затереть своё).
-
-## Как перенести фикс
+## Перенос фикса
 
 1. `npm run sync:check -- --fetch`
-2. Посмотреть коммит: `git show upstream/main -- src/sources/foo.ts`
-3. Варианты:
-   - **cherry-pick** (если коммит только sources):  
-     `git cherry-pick -n <sha>` → правки → `git commit`
-   - **ручной перенос** — часто проще из-за `registry.ts` / `meta.ts`
-4. `npm test` и быстрый поиск в dev
+2. `git show upstream/main -- src/sources/…`
+3. Cherry-pick (`git cherry-pick -n <sha>`) или ручное копирование — второе часто проще из‑за `registry.ts` / `meta.ts`
+4. `npm test`
 
-## Когда можно не смотреть upstream
+## Когда можно пропустить
 
-- Только chore (nix, version bump) без изменений в `src/sources/`
-- Ты сам починил источник и upstream мёртвый
-
-Подписка **Watch → Releases** на baairon/torlink — опционально, на случай если снова оживут.
+Chore без изменений в `src/sources/` (nix, version bump). Или если источник уже починен у нас, а upstream давно не трогали.
 
 ## Версии
 
-Версию npm (`package.json`) и Tauri (`src-tauri/`) ведём **независимо** от upstream. Совпадение 1.3.x / 1.4.x ни о чём не говорит.
+`package.json` и `src-tauri/` ведём сами. Совпадение номеров с upstream ни о чём не говорит.

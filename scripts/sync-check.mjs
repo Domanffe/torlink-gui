@@ -71,4 +71,4 @@ const diffStat = run(`git diff --stat ${upstreamRef} HEAD -- ${pathArgs}`);
 console.log(diffStat || "(identical in sync zone)");
 
 section("Tip");
-console.log("Cherry-pick or copy by hand. See docs/upstream.md.");
+console.log("Details: docs/upstream.md");
