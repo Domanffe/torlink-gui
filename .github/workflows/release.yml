@@ -40,16 +40,16 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Build sidecar binaries
+        run: |
+          npm run build:sidecar
+          npm run build:sidecar:bin
+
       - name: Test before release build
         run: |
           npm run typecheck
           npm test
           cargo test --manifest-path src-tauri/Cargo.toml
-
-      - name: Build sidecar binaries
-        run: |
-          npm run build:sidecar
-          npm run build:sidecar:bin
 
       - name: Build and publish release
         uses: tauri-apps/tauri-action@v0

@@ -26,6 +26,11 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Build sidecar binaries
+        run: |
+          npm run build:sidecar
+          npm run build:sidecar:bin
+
       - name: Typecheck
         run: npm run typecheck
 
