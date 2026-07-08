@@ -19,6 +19,7 @@ use crate::persistence::{
 
 const HISTORY_MAX: usize = 500;
 const POLL_MS: u64 = 500;
+const RESTORE_TIMEOUT_SECS: u64 = 5;
 
 #[derive(Clone, serde::Serialize)]
 pub struct TorrentListResponse {
@@ -54,6 +55,37 @@ fn norm_hash(id: &str) -> String {
 
 fn mbps_to_bytes(mbps: f64) -> u64 {
     (mbps * 1024.0 * 1024.0) as u64
+}
+
+fn seed_status(raw: &str) -> SeedStatus {
+    if raw == "paused" {
+        SeedStatus::Paused
+    } else {
+        SeedStatus::Seeding
+    }
+}
+
+fn make_seed_item(
+    rec: &SeedRecord,
+    id: String,
+    name: String,
+    source: Option<String>,
+    magnet: String,
+    dir: String,
+    size_bytes: u64,
+) -> SeedItem {
+    SeedItem {
+        id,
+        name,
+        source,
+        magnet,
+        dir,
+        size_bytes,
+        status: seed_status(&rec.status),
+        upload_speed: 0,
+        uploaded: 0,
+        peers: 0,
+    }
 }
 
 fn parse_bitfield_dump(s: &str) -> Option<Vec<bool>> {
@@ -142,22 +174,15 @@ impl TorrentManager {
             if let Some(item) = queue.iter().find(|q| q.id == rec.id) {
                 seeds.insert(
                     rec.id.clone(),
-                    SeedItem {
-                        id: item.id.clone(),
-                        name: item.name.clone(),
-                        source: item.source.clone(),
-                        magnet: item.magnet.clone(),
-                        dir: item.dir.clone(),
-                        size_bytes: item.total_bytes,
-                        status: if rec.status == "paused" {
-                            SeedStatus::Paused
-                        } else {
-                            SeedStatus::Seeding
-                        },
-                        upload_speed: 0,
-                        uploaded: 0,
-                        peers: 0,
-                    },
+                    make_seed_item(
+                        rec,
+                        item.id.clone(),
+                        item.name.clone(),
+                        item.source.clone(),
+                        item.magnet.clone(),
+                        item.dir.clone(),
+                        item.total_bytes,
+                    ),
                 );
             }
         }
@@ -170,27 +195,20 @@ impl TorrentManager {
             if let Some(h) = history.iter().find(|h| h.id == rec.id) {
                 seeds.insert(
                     rec.id.clone(),
-                    SeedItem {
-                        id: h.id.clone(),
-                        name: h.name.clone(),
-                        source: h.source.clone(),
-                        magnet: h.magnet.clone(),
-                        dir: h.dir.clone(),
-                        size_bytes: h.size_bytes,
-                        status: if rec.status == "paused" {
-                            SeedStatus::Paused
-                        } else {
-                            SeedStatus::Seeding
-                        },
-                        upload_speed: 0,
-                        uploaded: 0,
-                        peers: 0,
-                    },
+                    make_seed_item(
+                        rec,
+                        h.id.clone(),
+                        h.name.clone(),
+                        h.source.clone(),
+                        h.magnet.clone(),
+                        h.dir.clone(),
+                        h.size_bytes,
+                    ),
                 );
             }
         }
 
-        let mut mgr = Self {
+        let mgr = Self {
             paths,
             config,
             api,
@@ -200,9 +218,14 @@ impl TorrentManager {
             search_port,
         };
 
-        mgr.restore_active().await?;
-
         let shared = Arc::new(Mutex::new(mgr));
+        let restore_ref = shared.clone();
+        tauri::async_runtime::spawn(async move {
+            let mut g = restore_ref.lock().await;
+            if let Err(e) = g.restore_active().await {
+                warn!("restore_active error: {e:#}");
+            }
+        });
         let poll_ref = shared.clone();
         let handle = app.clone();
         tauri::async_runtime::spawn(async move {
@@ -226,17 +249,30 @@ impl TorrentManager {
         let items: Vec<QueueItem> = self.queue.clone();
         for item in items {
             if item.status == DownloadStatus::Downloading {
-                self.start_torrent(&item.id, &item.magnet, &item.dir).await?;
+                self.restore_one(&item.id, &item.magnet, &item.dir).await;
             }
         }
         let seeds: Vec<SeedItem> = self.seeds.values().cloned().collect();
         for seed in seeds {
             if seed.status == SeedStatus::Seeding {
                 let source = self.torrent_source(&seed.id, &seed.magnet);
-                self.start_torrent(&seed.id, &source, &seed.dir).await?;
+                self.restore_one(&seed.id, &source, &seed.dir).await;
             }
         }
         Ok(())
+    }
+
+    async fn restore_one(&self, id: &str, source: &str, dir: &str) {
+        match tokio::time::timeout(
+            Duration::from_secs(RESTORE_TIMEOUT_SECS),
+            self.start_torrent(id, source, dir),
+        )
+        .await
+        {
+            Ok(Ok(())) => {}
+            Ok(Err(e)) => warn!(torrent_id = id, "restore skipped: {e:#}"),
+            Err(_) => warn!(torrent_id = id, "restore timed out after {RESTORE_TIMEOUT_SECS}s"),
+        }
     }
 
     fn torrent_source(&self, id: &str, magnet: &str) -> String {

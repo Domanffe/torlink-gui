@@ -19,10 +19,13 @@ const newsItem = (title: string): string =>
 const feed = (...items: string[]): string => `<rss><channel>${items.join("")}</channel></rss>`;
 
 const page = (xml: string): Response =>
-  ({ ok: true, status: 200, text: async () => xml }) as unknown as Response;
+  new Response(xml, {
+    status: 200,
+    headers: { "content-type": "application/rss+xml; charset=utf-8" },
+  });
 
 const notFound = (): Response =>
-  ({ ok: false, status: 404, text: async () => "" }) as unknown as Response;
+  new Response("", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
 
 const hashes = (n: number, prefix: string): string[] =>
   Array.from({ length: n }, (_, i) => `${prefix}${String(i).padStart(39, "0")}`);

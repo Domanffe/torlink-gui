@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseRetryAfter, backoffDelay, fetchResilient, HttpError } from "./net";
+import { parseRetryAfter, backoffDelay, fetchResilient, HttpError, decodeResponseText } from "./net";
 
 function fakeRes(status: number, headers: Record<string, string> = {}): Response {
   return {
@@ -103,5 +103,29 @@ describe("fetchResilient", () => {
       }),
     ).rejects.toBeInstanceOf(HttpError);
     expect(Date.now() - started).toBeLessThan(5_000);
+  });
+});
+
+describe("decodeResponseText", () => {
+  it("decodes windows-1251 from the content-type header", async () => {
+    const bytes = Uint8Array.from([0xcf, 0xf0, 0xe8, 0xe2, 0xe5, 0xf2]);
+    const res = new Response(bytes, {
+      headers: { "content-type": "text/html; charset=windows-1251" },
+    });
+
+    await expect(decodeResponseText(res)).resolves.toBe("Привет");
+  });
+
+  it("sniffs charset from a meta tag when the header omits it", async () => {
+    const bytes = Uint8Array.from([
+      0x3c, 0x6d, 0x65, 0x74, 0x61, 0x20, 0x63, 0x68, 0x61, 0x72, 0x73, 0x65, 0x74, 0x3d, 0x22,
+      0x77, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x73, 0x2d, 0x31, 0x32, 0x35, 0x31, 0x22, 0x3e, 0xcf,
+      0xf0, 0xe8, 0xe2, 0xe5, 0xf2,
+    ]);
+    const res = new Response(bytes, {
+      headers: { "content-type": "text/html" },
+    });
+
+    await expect(decodeResponseText(res)).resolves.toContain("Привет");
   });
 });

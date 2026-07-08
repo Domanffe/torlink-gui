@@ -1,4 +1,4 @@
-import { fetchResilient, HttpError, USER_AGENT } from "../util/net";
+import { decodeResponseText, fetchResilient, HttpError, USER_AGENT } from "../util/net";
 import { unescapeEntities } from "./rss";
 import { parseSize } from "../util/format";
 import type { SearchOptions, Source, SourceId, TorrentResult } from "./types";
@@ -43,7 +43,7 @@ async function fetchText(url: string, opts: SearchOptions, retries: number): Pro
     retries,
   });
   if (!res.ok) throw new HttpError(res.status, `1337x returned ${res.status}`);
-  return res.text();
+  return decodeResponseText(res);
 }
 
 const MONTHS: Record<string, number> = {

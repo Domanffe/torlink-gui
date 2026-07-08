@@ -42,8 +42,9 @@
       "active": true,
       "dialog": true,
       "endpoints": [
-        "https://github.com/Domanffe/torlink-gui/releases/latest/download/latest.json",
-        "https://raw.githubusercontent.com/Domanffe/torlink-gui/main/updater/latest.json"
+        "https://cdn.jsdelivr.net/gh/Domanffe/torlink-gui@main/updater/latest.json",
+        "https://raw.githubusercontent.com/Domanffe/torlink-gui/main/updater/latest.json",
+        "https://github.com/Domanffe/torlink-gui/releases/latest/download/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFGMTZFQkNBNjU3Njg0MkEKUldRcWhIWmx5dXNXSDR3KzBGRWZpcDVUby84bHZSS1JYL3hZaTBUTCt2SzM4UUh1ZUlQWnpZSXUK"
     }

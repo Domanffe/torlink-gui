@@ -1,4 +1,4 @@
-import { fetchResilient, HttpError, USER_AGENT } from "../util/net";
+import { decodeResponseText, fetchResilient, HttpError, USER_AGENT } from "../util/net";
 import { buildMagnet } from "./magnet";
 import { unescapeEntities } from "./rss";
 import { parseSize } from "../util/format";
@@ -18,7 +18,7 @@ async function search(query: string, opts: SearchOptions = {}): Promise<TorrentR
   });
   if (!res.ok) throw new HttpError(res.status, `Nyaa returned ${res.status}`);
 
-  const xml = await res.text();
+  const xml = await decodeResponseText(res);
   const out: TorrentResult[] = [];
   for (const item of xml.split("<item>").slice(1)) {
     const infoHash = tag(item, "nyaa:infoHash").toLowerCase();

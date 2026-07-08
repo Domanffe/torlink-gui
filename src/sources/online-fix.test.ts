@@ -24,7 +24,10 @@ vi.mock("./torrentBytes", () => ({
 const mockFetch = vi.mocked(fetchResilient);
 
 const page = (html: string): Response =>
-  ({ ok: true, status: 200, text: async () => html, arrayBuffer: async () => new ArrayBuffer(0) }) as unknown as Response;
+  new Response(html, {
+    status: 200,
+    headers: { "content-type": "text/html; charset=utf-8" },
+  });
 
 beforeEach(() => {
   mockFetch.mockReset();

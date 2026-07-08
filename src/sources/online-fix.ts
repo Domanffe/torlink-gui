@@ -1,4 +1,4 @@
-import { fetchResilient, HttpError, USER_AGENT } from "../util/net";
+import { decodeResponseText, fetchResilient, HttpError, USER_AGENT } from "../util/net";
 import { buildMagnet } from "./magnet";
 import { unescapeEntities } from "./rss";
 import { magnetFromTorrentBytes } from "./torrentBytes";
@@ -73,7 +73,7 @@ export function parseTorrentFileFromListing(html: string, baseUrl: string): stri
 async function fetchText(url: string, opts: SearchOptions): Promise<string> {
   const res = await fetchResilient(url, { headers: HEADERS, signal: opts.signal });
   if (!res.ok) throw new HttpError(res.status, `online-fix returned ${res.status}`);
-  return res.text();
+  return decodeResponseText(res);
 }
 
 async function resolveMagnet(

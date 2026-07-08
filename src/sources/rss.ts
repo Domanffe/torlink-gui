@@ -1,4 +1,4 @@
-import { fetchResilient, HttpError, USER_AGENT } from "../util/net";
+import { decodeResponseText, fetchResilient, HttpError, USER_AGENT } from "../util/net";
 import type { SearchOptions, SourceId, TorrentResult } from "./types";
 
 export function unescapeEntities(s: string): string {
@@ -55,7 +55,7 @@ async function fetchFeedPage(
     ...(retries !== undefined ? { retries } : {}),
   });
   if (!res.ok) throw new HttpError(res.status, `${source} feed returned ${res.status}`);
-  return res.text();
+  return decodeResponseText(res);
 }
 
 export async function fetchWordpressRss(

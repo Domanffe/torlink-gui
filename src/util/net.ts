@@ -26,6 +26,36 @@ const DEFAULT_RETRIES = 5;
 const DEFAULT_BASE_MS = 500;
 const DEFAULT_CAP_MS = 20000;
 
+function headerCharset(contentType: string | null): string | null {
+  const match = contentType?.match(/charset\s*=\s*["']?([^;"'\s]+)/i);
+  return match?.[1]?.trim().toLowerCase() ?? null;
+}
+
+function sniffCharset(bytes: Uint8Array): string | null {
+  const probe = new TextDecoder("latin1").decode(bytes.subarray(0, 2048));
+  const match =
+    probe.match(/<meta[^>]+charset=["']?\s*([^"'>\s/]+)/i) ??
+    probe.match(/<meta[^>]+content=["'][^"']*charset=([^"'>\s;]+)/i);
+  return match?.[1]?.trim().toLowerCase() ?? null;
+}
+
+function normalizeCharset(label: string | null): string {
+  if (!label) return "utf-8";
+  if (label === "cp1251") return "windows-1251";
+  if (label === "utf8") return "utf-8";
+  return label;
+}
+
+export async function decodeResponseText(res: Response): Promise<string> {
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  const charset = normalizeCharset(headerCharset(res.headers.get("content-type")) ?? sniffCharset(bytes));
+  try {
+    return new TextDecoder(charset).decode(bytes);
+  } catch {
+    return new TextDecoder("utf-8").decode(bytes);
+  }
+}
+
 // Resolves early on abort so a cancelled search never sits out a backoff wait;
 // the retry loop re-checks the signal and bails right after.
 function realSleep(ms: number, signal?: AbortSignal): Promise<void> {
