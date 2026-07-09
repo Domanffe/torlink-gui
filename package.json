@@ -1,6 +1,6 @@
 {
   "name": "torlnk",
-  "version": "1.4.8",
+  "version": "1.5.0",
   "description": "A sleek torrent finder and downloader with a modern GUI (Tauri + librqbit).",
   "type": "module",
   "bin": {
@@ -15,7 +15,6 @@
   },
   "scripts": {
     "dev": "tsx src/index.tsx",
-    "dev:tui": "tsx src/index.tsx --tui",
     "dev:gui": "vite",
     "dev:search": "tsx scripts/dev-search.ts",
     "dev:stack": "node scripts/dev-before.mjs",
@@ -25,14 +24,13 @@
     "build:gui": "vite build",
     "build:sidecar": "tsup --config tsup.sidecar.config.ts",
     "build:sidecar:bin": "node scripts/build-sidecar-bin.mjs",
-    "build:tauri": "tauri build",
+    "build:tauri": "node scripts/build-tauri.mjs",
     "postbuild": "node scripts/postbuild.cjs",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "sync:check": "node scripts/sync-check.mjs",
     "verify:seeding": "tsx scripts/verify-seeding.ts",
-    "previews": "tsx scripts/render-previews.tsx",
     "prepublishOnly": "npm run build && npm run build:gui && npm run build:sidecar"
   },
   "keywords": [
@@ -47,10 +45,7 @@
     "tauri",
     "gui",
     "seeding",
-    "tui",
-    "terminal",
     "cli",
-    "ink",
     "zero-configuration",
     "zero-setup",
     "fitgirl"
@@ -76,8 +71,6 @@
     "@tauri-apps/plugin-dialog": "^2.3.0",
     "@tauri-apps/plugin-process": "^2.3.0",
     "@tauri-apps/plugin-updater": "^2.9.0",
-    "env-paths": "^4.0.0",
-    "ink": "^7.0.5",
     "motion": "^12.42.2",
     "parse-torrent": "^11.0.21",
     "react": "^19.2.7",
@@ -89,7 +82,6 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
-    "ink-testing-library": "^4.0.0",
     "tsup": "^8.5.1",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",

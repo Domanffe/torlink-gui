@@ -5,20 +5,18 @@ use crate::config::AppConfig;
 use crate::torrent::TorrentListResponse;
 
 #[tauri::command]
-pub fn get_config(state: State<'_, AppState>) -> AppConfig {
-    tauri::async_runtime::block_on(async { state.torrents.lock().await.get_config() })
+pub async fn get_config(state: State<'_, AppState>) -> Result<AppConfig, String> {
+    Ok(state.torrents.lock().await.get_config())
 }
 
 #[tauri::command]
-pub fn set_config(state: State<'_, AppState>, config: AppConfig) -> Result<(), String> {
-    tauri::async_runtime::block_on(async {
-        state
-            .torrents
-            .lock()
-            .await
-            .set_config(config)
-            .map_err(|e| e.to_string())
-    })
+pub async fn set_config(state: State<'_, AppState>, config: AppConfig) -> Result<(), String> {
+    state
+        .torrents
+        .lock()
+        .await
+        .set_config(config)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -41,8 +39,8 @@ pub async fn torrent_add(
 }
 
 #[tauri::command]
-pub fn torrent_list(state: State<'_, AppState>) -> TorrentListResponse {
-    tauri::async_runtime::block_on(async { state.torrents.lock().await.list() })
+pub async fn torrent_list(state: State<'_, AppState>) -> Result<TorrentListResponse, String> {
+    Ok(state.torrents.lock().await.list())
 }
 
 #[tauri::command]
@@ -116,8 +114,8 @@ pub async fn torrent_clear_history(state: State<'_, AppState>) -> Result<(), Str
 }
 
 #[tauri::command]
-pub fn get_search_port(state: State<'_, AppState>) -> u16 {
-    tauri::async_runtime::block_on(async { state.search.lock().await.port() })
+pub async fn get_search_port(state: State<'_, AppState>) -> Result<u16, String> {
+    Ok(state.search.lock().await.port())
 }
 
 #[tauri::command]

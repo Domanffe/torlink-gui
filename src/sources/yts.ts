@@ -22,6 +22,30 @@ interface YtsResponse {
   data?: { movies?: YtsMovie[] };
 }
 
+export function mapYtsResponse(json: YtsResponse): TorrentResult[] {
+  const out: TorrentResult[] = [];
+  for (const movie of json.data?.movies ?? []) {
+    const base = movie.title_long || movie.title || "Unknown";
+    for (const t of movie.torrents ?? []) {
+      if (!t.hash) continue;
+      const infoHash = t.hash.toLowerCase();
+      const tag = [t.quality, t.type].filter(Boolean).join(" ");
+      const name = tag ? `${base} [${tag}]` : base;
+      out.push({
+        infoHash,
+        name,
+        sizeBytes: t.size_bytes ?? 0,
+        seeders: t.seeds ?? 0,
+        leechers: t.peers ?? 0,
+        source: "yts",
+        magnet: buildMagnet(infoHash, name),
+        added: movie.date_uploaded_unix,
+      });
+    }
+  }
+  return out;
+}
+
 async function fetchMovies(params: URLSearchParams, opts: SearchOptions): Promise<YtsResponse> {
   let lastError: unknown;
   for (const host of HOSTS) {
@@ -48,27 +72,7 @@ async function search(query: string, opts: SearchOptions = {}): Promise<TorrentR
   else params.set("sort_by", "date_added");
 
   const json = await fetchMovies(params, opts);
-  const out: TorrentResult[] = [];
-  for (const movie of json.data?.movies ?? []) {
-    const base = movie.title_long || movie.title || "Unknown";
-    for (const t of movie.torrents ?? []) {
-      if (!t.hash) continue;
-      const infoHash = t.hash.toLowerCase();
-      const tag = [t.quality, t.type].filter(Boolean).join(" ");
-      const name = tag ? `${base} [${tag}]` : base;
-      out.push({
-        infoHash,
-        name,
-        sizeBytes: t.size_bytes ?? 0,
-        seeders: t.seeds ?? 0,
-        leechers: t.peers ?? 0,
-        source: "yts",
-        magnet: buildMagnet(infoHash, name),
-        added: movie.date_uploaded_unix,
-      });
-    }
-  }
-  return out;
+  return mapYtsResponse(json);
 }
 
 export const yts: Source = {

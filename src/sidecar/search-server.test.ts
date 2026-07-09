@@ -15,4 +15,19 @@ describe("search sidecar", () => {
       close();
     }
   });
+
+  it("streams search results over SSE", async () => {
+    const { port, close } = await startSearchServer(0);
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/search?q=__sidecar-test__`);
+      expect(res.ok).toBe(true);
+      const reader = res.body!.getReader();
+      const { value } = await reader.read();
+      const chunk = new TextDecoder().decode(value ?? new Uint8Array());
+      expect(chunk).toContain("data:");
+      await reader.cancel();
+    } finally {
+      close();
+    }
+  });
 });

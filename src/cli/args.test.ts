@@ -11,9 +11,11 @@ describe("parseCliArgs", () => {
     expect(parseCliArgs(["--help"])).toEqual({ kind: "help" });
     expect(parseCliArgs(["-h"])).toEqual({ kind: "help" });
   });
-  it("parses --tui and --search", () => {
-    expect(parseCliArgs(["--tui"])).toEqual({ kind: "tui" });
+  it("parses --search", () => {
     expect(parseCliArgs(["--search"])).toEqual({ kind: "search" });
+  });
+  it("rejects removed --tui flag", () => {
+    expect(parseCliArgs(["--tui"])).toEqual({ kind: "invalid", arg: "--tui" });
   });
   it("launches a magnet in gui mode", () => {
     expect(parseCliArgs(["magnet:?xt=urn:btih:abc"])).toEqual({

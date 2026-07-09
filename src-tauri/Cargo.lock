@@ -5095,12 +5095,11 @@ checksum = "756daf9b1013ebe47a8776667b466417e2d4c5679d441c26230efd9ef78692db"
 
 [[package]]
 name = "torlink"
-version = "1.4.8"
+version = "1.5.0"
 dependencies = [
  "anyhow",
  "directories 5.0.1",
  "librqbit",
- "parking_lot",
  "reqwest 0.12.28",
  "serde",
  "serde_json",

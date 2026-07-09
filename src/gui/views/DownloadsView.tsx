@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Card } from "../components/Card";
 import { TorrentProgress } from "../components/TorrentProgress";
 import { truncate } from "../../util/format";
-import { sourceStyle } from "../../ui/theme";
+import { sourceStyle } from "../../sources/style";
 import type { HistoryItem, QueueItem } from "../hooks/useTorrents";
 import { useTorrents } from "../hooks/useTorrents";
 import { useFormat } from "../hooks/useFormat";
@@ -82,7 +82,7 @@ export function DownloadsView() {
             {items.map((it) => {
               const paused = isPaused(it);
               const failed = isFailed(it);
-              const ss = it.source ? sourceStyle(it.source as never) : null;
+              const ss = it.source ? sourceStyle(it.source) : null;
               return (
                 <li key={it.id} className={`download-item${failed ? " download-item--failed" : ""}`}>
                   <div className="download-head">

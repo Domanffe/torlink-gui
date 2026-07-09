@@ -6,7 +6,6 @@
   "permissions": [
     "core:default",
     "dialog:default",
-    "shell:default",
     "updater:default",
     "process:default",
     {
@@ -15,7 +14,7 @@
         {
           "name": "search-sidecar",
           "sidecar": true,
-          "args": true
+          "args": []
         }
       ]
     },
@@ -25,7 +24,7 @@
         {
           "name": "search-sidecar",
           "sidecar": true,
-          "args": true
+          "args": []
         }
       ]
     }

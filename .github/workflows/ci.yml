@@ -26,6 +26,9 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Audit npm dependencies
+        run: npm audit --audit-level=moderate
+
       - name: Build desktop assets
         run: |
           npm run build:gui
@@ -43,3 +46,8 @@ jobs:
 
       - name: Check Rust
         run: cargo check --manifest-path src-tauri/Cargo.toml
+
+      - name: Audit Rust dependencies
+        run: |
+          cargo install cargo-audit --locked
+          cargo audit --manifest-path src-tauri/Cargo.toml

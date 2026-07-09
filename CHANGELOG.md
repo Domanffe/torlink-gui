@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.5.0 — 2026-07-09
+
+### Changed
+- Removed deprecated Ink TUI and TypeScript download stack; desktop app is the only download path
+- Hardened Tauri security (CSP, scoped shell capabilities, download path validation)
+- Expanded test coverage for search, sources, and Rust backend
+- Added Dependabot and dependency audits in CI
+
 ## 1.4.8 — 2026-07-08
 
 ### Fixed

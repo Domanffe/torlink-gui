@@ -14,13 +14,10 @@ pub fn replace_file(tmp: &Path, dest: &Path) -> std::io::Result<()> {
     }
 }
 
-pub fn open_folder(path: &str) -> std::io::Result<()> {
-    if !Path::new(path).exists() {
-        return Err(std::io::Error::new(
-            ErrorKind::NotFound,
-            "download folder does not exist",
-        ));
-    }
+pub fn open_folder(path: &str, download_root: &str) -> std::io::Result<()> {
+    let root = crate::path_guard::validate_download_path(path, download_root)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::PermissionDenied, e))?;
+    let path = root.to_string_lossy().to_string();
 
     #[cfg(target_os = "windows")]
     {

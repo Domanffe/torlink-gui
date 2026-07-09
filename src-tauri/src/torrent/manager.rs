@@ -20,6 +20,9 @@ use crate::persistence::{
 const HISTORY_MAX: usize = 500;
 const POLL_MS: u64 = 500;
 const RESTORE_TIMEOUT_SECS: u64 = 5;
+const STRAY_TICKS: u32 = 2;
+const SEED_GRACE_MS: u64 = 10_000;
+use crate::torrent::logic::{norm_hash, parse_bitfield_dump, seed_status, stray_download};
 
 #[derive(Clone, serde::Serialize)]
 pub struct TorrentListResponse {
@@ -36,6 +39,8 @@ pub struct TorrentManager {
     seeds: HashMap<String, SeedItem>,
     history: Vec<HistoryItem>,
     search_port: u16,
+    stray_hits: HashMap<String, u32>,
+    seed_grace_until: HashMap<String, u64>,
 }
 
 fn now_ms() -> u64 {
@@ -49,20 +54,8 @@ fn torrent_id(id: &str) -> anyhow::Result<TorrentIdOrHash> {
     TorrentIdOrHash::parse(&norm_hash(id))
 }
 
-fn norm_hash(id: &str) -> String {
-    id.trim().to_ascii_lowercase()
-}
-
 fn mbps_to_bytes(mbps: f64) -> u64 {
     (mbps * 1024.0 * 1024.0) as u64
-}
-
-fn seed_status(raw: &str) -> SeedStatus {
-    if raw == "paused" {
-        SeedStatus::Paused
-    } else {
-        SeedStatus::Seeding
-    }
 }
 
 fn make_seed_item(
@@ -85,25 +78,6 @@ fn make_seed_item(
         upload_speed: 0,
         uploaded: 0,
         peers: 0,
-    }
-}
-
-fn parse_bitfield_dump(s: &str) -> Option<Vec<bool>> {
-    if !s.contains("true") && !s.contains("false") {
-        return None;
-    }
-    let mut out = Vec::new();
-    for token in s.split(|c: char| c == ',' || c == '[' || c == ']' || c.is_whitespace()) {
-        match token.trim() {
-            "true" => out.push(true),
-            "false" => out.push(false),
-            _ => {}
-        }
-    }
-    if out.is_empty() {
-        None
-    } else {
-        Some(out)
     }
 }
 
@@ -216,6 +190,8 @@ impl TorrentManager {
             seeds,
             history,
             search_port,
+            stray_hits: HashMap::new(),
+            seed_grace_until: HashMap::new(),
         };
 
         let shared = Arc::new(Mutex::new(mgr));
@@ -378,6 +354,10 @@ impl TorrentManager {
         size_bytes: Option<u64>,
     ) -> anyhow::Result<()> {
         let id = norm_hash(&id);
+        let dir = crate::path_guard::validate_download_path(&dir, &self.config.download_dir)
+            .map_err(|e| anyhow::anyhow!(e))?
+            .to_string_lossy()
+            .into_owned();
         std::fs::create_dir_all(&dir).ok();
 
         if self.seeds.remove(&id).is_some() {
@@ -636,6 +616,26 @@ impl TorrentManager {
                 s.upload_speed = up_speed;
                 s.uploaded = stats.uploaded_bytes;
                 s.peers = peers;
+
+                if s.status == SeedStatus::Seeding {
+                    let key = norm_hash(&hash);
+                    let grace = self.seed_grace_until.get(&key).copied().unwrap_or(0);
+                    if now_ms() > grace
+                        && stray_download(stats.total_bytes, stats.progress_bytes, down_speed)
+                    {
+                        let hits = self.stray_hits.entry(key.clone()).or_insert(0);
+                        *hits += 1;
+                        if *hits >= STRAY_TICKS {
+                            self.stray_hits.remove(&key);
+                            self.seed_grace_until.remove(&key);
+                            s.status = SeedStatus::Missing;
+                            s.upload_speed = 0;
+                            s.peers = 0;
+                        }
+                    } else {
+                        self.stray_hits.insert(key, 0);
+                    }
+                }
             }
         }
 
@@ -643,8 +643,12 @@ impl TorrentManager {
             self.complete_download(&id);
         }
 
-        self.persist_queue().ok();
-        self.persist_seeds().ok();
+        if let Err(e) = self.persist_queue() {
+            warn!("persist_queue failed: {e:#}");
+        }
+        if let Err(e) = self.persist_seeds() {
+            warn!("persist_seeds failed: {e:#}");
+        }
         Ok(())
     }
 
@@ -683,10 +687,19 @@ impl TorrentManager {
                 peers: 0,
             },
         );
+        self.seed_grace_until
+            .insert(norm_hash(id), now_ms() + SEED_GRACE_MS);
+        self.stray_hits.insert(norm_hash(id), 0);
 
-        let _ = save_history(&self.paths, &self.history);
-        let _ = self.persist_queue();
-        let _ = self.persist_seeds();
+        if let Err(e) = save_history(&self.paths, &self.history) {
+            warn!("save_history failed: {e:#}");
+        }
+        if let Err(e) = self.persist_queue() {
+            warn!("persist_queue failed: {e:#}");
+        }
+        if let Err(e) = self.persist_seeds() {
+            warn!("persist_seeds failed: {e:#}");
+        }
     }
 
     fn resolve_torrent(&self, id: &str) -> Option<TorrentIdOrHash> {
@@ -716,8 +729,8 @@ impl TorrentManager {
             .map(|s| SeedRecord {
                 id: s.id.clone(),
                 status: match s.status {
-                    SeedStatus::Paused => "paused".into(),
-                    _ => "seeding".into(),
+                    SeedStatus::Paused | SeedStatus::Missing => "paused".into(),
+                    SeedStatus::Seeding => "seeding".into(),
                 },
             })
             .collect();

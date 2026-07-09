@@ -1,6 +1,7 @@
 mod config;
 mod commands;
 mod fs;
+mod path_guard;
 mod persistence;
 mod sidecar;
 mod torrent;
@@ -21,9 +22,30 @@ pub struct AppState {
     pub search: Mutex<sidecar::SearchSidecar>,
 }
 
+fn is_russian_locale() -> bool {
+    for key in ["LANG", "LC_ALL", "LC_MESSAGES", "LANGUAGE"] {
+        if let Ok(val) = std::env::var(key) {
+            let lower = val.to_lowercase();
+            if lower.starts_with("ru") {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn tray_labels() -> (&'static str, &'static str) {
+    if is_russian_locale() {
+        ("Показать torlink", "Выход")
+    } else {
+        ("Show torlink", "Quit")
+    }
+}
+
 fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
-    let show = MenuItem::with_id(app, "show", "Show torlink", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+    let (show_label, quit_label) = tray_labels();
+    let show = MenuItem::with_id(app, "show", show_label, true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", quit_label, true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&show, &quit])?;
 
     let icon = app
@@ -90,7 +112,10 @@ pub fn run() {
                 let manager = TorrentManager::boot(handle.clone(), search.port()).await?;
                 Ok::<_, anyhow::Error>((search, manager))
             })
-            .expect("failed to boot torlink");
+            .map_err(|e| -> Box<dyn std::error::Error> {
+                tracing::error!("failed to boot torlink: {e:#}");
+                format!("failed to boot torlink: {e:#}").into()
+            })?;
 
             app.manage(AppState {
                 torrents: manager,

@@ -24,6 +24,12 @@ interface ApibayItem {
 
 const ZERO_HASH = "0000000000000000000000000000000000000000";
 
+export function mapApibayItems(items: ApibayItem[], source: SourceId): TorrentResult[] {
+  return items
+    .map((it) => toResult(it, source))
+    .filter((r): r is TorrentResult => r !== null);
+}
+
 function toResult(it: ApibayItem, source: SourceId): TorrentResult | null {
   const infoHash = (it.info_hash ?? "").toLowerCase();
   if (!infoHash || infoHash === ZERO_HASH || it.id === "0") return null;

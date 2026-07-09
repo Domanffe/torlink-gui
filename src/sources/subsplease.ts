@@ -16,7 +16,7 @@ interface SpEntry {
   downloads?: SpDownload[];
 }
 
-function pickBest(downloads: SpDownload[]): SpDownload | undefined {
+export function pickBest(downloads: SpDownload[]): SpDownload | undefined {
   for (const res of RES_PREFERENCE) {
     const d = downloads.find((d) => d.res === res && d.magnet);
     if (d) return d;
@@ -24,25 +24,7 @@ function pickBest(downloads: SpDownload[]): SpDownload | undefined {
   return downloads.find((d) => d.magnet);
 }
 
-async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
-  const q = query.trim();
-  const params = new URLSearchParams({ tz: "UTC" });
-  if (q) {
-    params.set("f", "search");
-    params.set("s", q);
-  } else {
-    params.set("f", "latest");
-  }
-
-  const res = await fetchResilient(`${API}?${params.toString()}`, {
-    headers: { "User-Agent": USER_AGENT },
-    signal: opts.signal,
-  });
-  if (!res.ok) throw new HttpError(res.status, `SubsPlease returned ${res.status}`);
-
-  const json = (await res.json()) as Record<string, SpEntry> | unknown[];
-  if (!json || Array.isArray(json)) return [];
-
+export function mapSubsplease(json: Record<string, SpEntry>): TorrentResult[] {
   const out: TorrentResult[] = [];
   for (const entry of Object.values(json)) {
     const dl = pickBest(entry.downloads ?? []);
@@ -66,6 +48,26 @@ async function search(query: string, opts: SearchOptions = {}): Promise<TorrentR
   return out;
 }
 
+async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+  const q = query.trim();
+  const params = new URLSearchParams({ tz: "UTC" });
+  if (q) {
+    params.set("f", "search");
+    params.set("s", q);
+  } else {
+    params.set("f", "latest");
+  }
+
+  const res = await fetchResilient(`${API}?${params.toString()}`, {
+    headers: { "User-Agent": USER_AGENT },
+    signal: opts.signal,
+  });
+  if (!res.ok) throw new HttpError(res.status, `SubsPlease returned ${res.status}`);
+
+  const json = (await res.json()) as Record<string, SpEntry> | unknown[];
+  if (!json || Array.isArray(json)) return [];
+  return mapSubsplease(json);
+}
 export const subsplease: Source = {
   id: "subsplease",
   label: "SubsPlease",

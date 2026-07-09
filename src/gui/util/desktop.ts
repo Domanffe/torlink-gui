@@ -1,8 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-
-function isTauri(): boolean {
-  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-}
+import { isTauri } from "./tauri";
 
 export async function openFolder(path: string): Promise<boolean> {
   if (!isTauri() || !path) return false;

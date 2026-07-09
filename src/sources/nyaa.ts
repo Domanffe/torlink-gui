@@ -10,15 +10,7 @@ function tag(item: string, name: string): string {
   return item.match(new RegExp(`<${name}>(?:<!\\[CDATA\\[)?(.*?)(?:\\]\\]>)?</${name}>`, "s"))?.[1]?.trim() ?? "";
 }
 
-async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
-  const params = new URLSearchParams({ page: "rss", q: query.trim(), c: "0_0", f: "0" });
-  const res = await fetchResilient(`${BASE}?${params.toString()}`, {
-    headers: { "User-Agent": USER_AGENT },
-    signal: opts.signal,
-  });
-  if (!res.ok) throw new HttpError(res.status, `Nyaa returned ${res.status}`);
-
-  const xml = await decodeResponseText(res);
+export function parseNyaaRss(xml: string): TorrentResult[] {
   const out: TorrentResult[] = [];
   for (const item of xml.split("<item>").slice(1)) {
     const infoHash = tag(item, "nyaa:infoHash").toLowerCase();
@@ -39,6 +31,18 @@ async function search(query: string, opts: SearchOptions = {}): Promise<TorrentR
     });
   }
   return out;
+}
+
+async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+  const params = new URLSearchParams({ page: "rss", q: query.trim(), c: "0_0", f: "0" });
+  const res = await fetchResilient(`${BASE}?${params.toString()}`, {
+    headers: { "User-Agent": USER_AGENT },
+    signal: opts.signal,
+  });
+  if (!res.ok) throw new HttpError(res.status, `Nyaa returned ${res.status}`);
+
+  const xml = await decodeResponseText(res);
+  return parseNyaaRss(xml);
 }
 
 export const nyaa: Source = {

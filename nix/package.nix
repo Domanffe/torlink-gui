@@ -2,62 +2,45 @@
   lib,
   buildNpmPackage,
   fetchFromGitHub,
-  # dependencies
-  fetchurl,
   nodejs_22,
   wl-clipboard,
   xclip,
 }:
 
 buildNpmPackage (finalAttrs: {
-  pname = "torlink";
-  version = "1.3.1";
+  pname = "torlnk";
+  version = "1.5.0";
   __structuredAttrs = true;
   strictDeps = true;
 
   src = fetchFromGitHub {
-    owner = "baairon";
-    repo = "torlink";
+    owner = "Domanffe";
+    repo = "torlink-gui";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-XMwJ1nVVcwXOhj3moqBMRngOAnAfbOuICHMAYQheeWA=";
+    # Update after release: nix-prefetch-url --unpack https://github.com/Domanffe/torlink-gui/archive/v1.5.0.tar.gz
+    hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
   };
 
   nodejs = nodejs_22;
-  npmDepsHash = "sha256-FT4SUjuEKefMG2zzA/QhafZbLab0tUeWHnO30+7smnI=";
-  # ignore-scripts for ip-set broken preinstall
+  # Update after changing package-lock.json: nix-build -A npmDeps
+  npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+
   npmFlags = [ "--ignore-scripts" ];
 
-  # node-datachannel binary tarball
-  nodeDatachannelPrebuilt = fetchurl {
-    url = "https://github.com/murat-dogan/node-datachannel/releases/download/v0.32.3/node-datachannel-v0.32.3-napi-v8-linux-x64.tar.gz";
-    sha256 = "4092afc9cd594a3326eb1bd823da452b227b742ea8222689b2cea6f7344cf67a";
-  };
-
-  # replicate postbuild from package.json
   postBuild = ''
     node scripts/postbuild.cjs
   '';
 
-  # extract node-datachannel tarball
-  # add wl-copy and xclip to nix readeable path
   postInstall = ''
-    tar -xzf ${finalAttrs.nodeDatachannelPrebuilt} \
-      -C $out/lib/node_modules/torlnk/node_modules/node-datachannel
-      wrapProgram $out/bin/torlnk \
-        --prefix PATH : ${
-          lib.makeBinPath [
-            wl-clipboard
-            xclip
-          ]
-        }
+    wrapProgram $out/bin/torlnk \
+      --prefix PATH : ${lib.makeBinPath [ wl-clipboard xclip ]}
   '';
 
   meta = {
-    description = "Torlink is a torrent finder that lives in your terminal, with zero setup and nothing to configure.";
-    homepage = "https://github.com/baairon/torlink";
-    changelog = "https://github.com/baairon/torlink/releases/tag/v${finalAttrs.src.tag}";
+    description = "Torlink browser search CLI (desktop downloads use the Tauri app)";
+    homepage = "https://github.com/Domanffe/torlink-gui";
+    changelog = "https://github.com/Domanffe/torlink-gui/releases/tag/v${finalAttrs.version}";
     license = lib.licenses.mit;
-    maintainers = with lib.maintainers; [ ghastrum ];
     mainProgram = "torlnk";
     platforms = lib.platforms.linux;
   };

@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useToast, type ToastKind } from "../components/Toast";
 import { useLocale } from "../i18n/LocaleProvider";
+import { isTauri } from "../util/tauri";
 import { errMsg } from "../util/errors";
 
 export interface QueueItem {
@@ -85,10 +86,6 @@ interface TorrentCtx {
 
 const Ctx = createContext<TorrentCtx | null>(null);
 const EMPTY_LIST: TorrentList = { downloads: [], seeds: [], history: [] };
-
-function isTauri(): boolean {
-  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-}
 
 export function TorrentProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();

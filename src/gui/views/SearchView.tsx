@@ -5,7 +5,7 @@ import { SearchSourceStrip } from "../components/SearchSourceStrip";
 import { getSourceMeta } from "../../sources/meta";
 import type { TorrentResult } from "../../sources/types";
 import { formatCount, truncate } from "../../util/format";
-import { sourceStyle } from "../../ui/theme";
+import { sourceStyle } from "../../sources/style";
 import { CATEGORY_GROUP } from "../sections";
 import { useSearch, useSearchPort } from "../hooks/useSearch";
 import { useTorrents } from "../hooks/useTorrents";

@@ -1,42 +1,33 @@
 # Flake install
-Add this repo to your ```flake.nix```. The package is built using the unstable channel. You can overwrite this by setting ```inputs.nixpkgs.follows = "nixpkgs"``` (if your default is 26.05).
 
-**The binary is executed as ```torlnk```.**
+This flake packages the **browser search CLI** (`torlnk`). Full downloads require the [Torlink-Gui desktop app](https://github.com/Domanffe/torlink-gui/releases).
 
 ```nix
 inputs = {
-  ...
-  torlink.url = "github:baairon/torlink";
-  ...
-}
+  torlink-gui.url = "github:Domanffe/torlink-gui";
+};
 ```
 
-You can install the package in either home.nix or your configuration.nix depending on your preference.
+**User (`home.nix`)**
 
-**User**
 ```nix
-# home.nix
-{ pkgs, inputs, ... }: 
-
+{ pkgs, inputs, ... }:
 {
-  home.packages = with pkgs; [
-    ...
-    inputs.torlink.packages.${pkgs.system}.default
-    ...
+  home.packages = [
+    inputs.torlink-gui.packages.${pkgs.system}.default
   ];
 }
 ```
 
-**System**
-```nix
-# configuration.nix
-{ pkgs, inputs, ... }: 
+**System (`configuration.nix`)**
 
+```nix
+{ pkgs, inputs, ... }:
 {
-  environment.systemPackages = with pkgs; [
-    ...
-    inputs.torlink.packages.${pkgs.system}.default
-    ...
+  environment.systemPackages = [
+    inputs.torlink-gui.packages.${pkgs.system}.default
   ];
 }
 ```
+
+After bumping `version` in `nix/package.nix`, refresh `src` and `npmDepsHash` with `nix-prefetch-url` / `nix-build`.

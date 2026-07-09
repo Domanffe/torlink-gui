@@ -10,8 +10,8 @@
 | Из upstream | Оставить только у нас |
 | --- | --- |
 | `src/sources/**` | `src-tauri/`, `src/gui/` |
-| `src/sources/*.test.ts` | `src/ui/` (Ink) |
-| иногда `src/util/format.ts` | `src/download/engine.ts` |
+| `src/sources/*.test.ts` | `src/sidecar/`, `src/core/` |
+| иногда `src/util/format.ts` | |
 
 Поверх адаптеров у нас свои слои: `meta.ts`, lazy `registry.ts`, `core/search.ts`, sidecar, Rust. После переноса фикса — `npm test` и быстрый поиск в dev.
 

@@ -3,7 +3,7 @@ import type { Section } from "../App";
 import type { SourceState } from "../../core/search-state";
 import { getSourceMeta, SOURCE_IDS } from "../../sources/meta";
 import type { SourceId } from "../../sources/types";
-import { sourceStyle } from "../../ui/theme";
+import { sourceStyle } from "../../sources/style";
 import { CATEGORY_GROUP } from "../sections";
 
 type ChipStatus = "loading" | "done" | "error";

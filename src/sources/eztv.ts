@@ -18,17 +18,7 @@ interface EztvResponse {
   torrents?: EztvTorrent[];
 }
 
-async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
-  if (query.trim()) return [];
-
-  const res = await fetchResilient(`${API}?limit=100&page=1`, {
-    headers: { "User-Agent": USER_AGENT },
-    signal: opts.signal,
-    retries: 1,
-  });
-  if (!res.ok) throw new HttpError(res.status, `EZTV returned ${res.status}`);
-
-  const json = (await res.json()) as EztvResponse;
+export function mapEztvResponse(json: EztvResponse): TorrentResult[] {
   const out: TorrentResult[] = [];
   for (const t of json.torrents ?? []) {
     const hash = (t.hash ?? "").toLowerCase();
@@ -47,6 +37,20 @@ async function search(query: string, opts: SearchOptions = {}): Promise<TorrentR
     });
   }
   return out;
+}
+
+async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+  if (query.trim()) return [];
+
+  const res = await fetchResilient(`${API}?limit=100&page=1`, {
+    headers: { "User-Agent": USER_AGENT },
+    signal: opts.signal,
+    retries: 1,
+  });
+  if (!res.ok) throw new HttpError(res.status, `EZTV returned ${res.status}`);
+
+  const json = (await res.json()) as EztvResponse;
+  return mapEztvResponse(json);
 }
 
 export const eztv: Source = {

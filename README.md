@@ -19,6 +19,8 @@ No Node required for the desktop app.
 
 If you only need search, `npx torlnk` still opens the web UI in a browser (Node 22+). Downloads from the browser build are not supported — use the desktop app for that.
 
+The npm CLI package is named **torlnk** (historical); the desktop app and Rust backend use **torlink**.
+
 ## Desktop app
 
 Search by category, queue downloads, pause and resume, seed when done. Settings (⚙ or `Ctrl+,`) let you change the download folder, add extra trackers, and pick the interface language (**System**, **English**, **Russian**). Closing the window sends the app to the system tray.

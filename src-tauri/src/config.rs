@@ -92,3 +92,33 @@ pub fn ensure_dirs(paths: &Paths) -> anyhow::Result<()> {
     std::fs::create_dir_all(&paths.torrents_dir)?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_config_has_download_dir() {
+        let cfg = AppConfig::default();
+        assert!(!cfg.download_dir.is_empty());
+        assert!(cfg.trackers.is_empty());
+    }
+
+    #[test]
+    fn load_config_returns_default_for_missing_file() {
+        let dir = std::env::temp_dir().join(format!("torlink-cfg-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let paths = Paths {
+            config_file: dir.join("config.json"),
+            queue_file: dir.join("queue.json"),
+            history_file: dir.join("history.json"),
+            seeds_file: dir.join("seeds.json"),
+            torrents_dir: dir.join("torrents"),
+            data_dir: dir.clone(),
+        };
+        let cfg = load_config(&paths);
+        assert!(!cfg.download_dir.is_empty());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+}

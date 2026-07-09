@@ -3,9 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ConcurrentSearchState } from "../../core/search-state";
 import { idleSearchState } from "../../core/search-state";
 
-function isTauri(): boolean {
-  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-}
+import { isTauri } from "../util/tauri";
 
 export function useSearchPort(): number {
   const [port, setPort] = useState(() => {

@@ -149,3 +149,53 @@ pub fn save_torrent_meta(paths: &Paths, id: &str, data: &[u8]) -> anyhow::Result
     replace_file(&tmp, &path)?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::Paths;
+
+    #[test]
+    fn load_queue_returns_empty_on_corrupt_file() {
+        let dir = std::env::temp_dir().join(format!("torlink-persist-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let paths = Paths {
+            config_file: dir.join("config.json"),
+            queue_file: dir.join("queue.json"),
+            history_file: dir.join("history.json"),
+            seeds_file: dir.join("seeds.json"),
+            torrents_dir: dir.join("torrents"),
+            data_dir: dir.clone(),
+        };
+        std::fs::write(&paths.queue_file, "{not json").unwrap();
+        assert!(load_queue(&paths).is_empty());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn queue_item_round_trips_through_json() {
+        let item = QueueItem {
+            id: "abc".into(),
+            name: "Test".into(),
+            source: Some("yts".into()),
+            magnet: "magnet:?xt=urn:btih:abc".into(),
+            dir: "/tmp".into(),
+            status: DownloadStatus::Downloading,
+            progress: 10,
+            total_bytes: 100,
+            downloaded_bytes: 10,
+            speed: 1,
+            peers: 2,
+            eta: None,
+            files: None,
+            error: None,
+            piece_map: None,
+            added_at: 1,
+        };
+        let json = serde_json::to_string(&item).unwrap();
+        let back: QueueItem = serde_json::from_str(&json).unwrap();
+        assert_eq!(back.id, "abc");
+        assert_eq!(back.status, DownloadStatus::Downloading);
+    }
+}

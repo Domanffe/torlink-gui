@@ -4,7 +4,6 @@ export type CliCommand =
   | { kind: "version" }
   | { kind: "help" }
   | { kind: "gui"; initialMagnet?: string; initialTorrent?: string }
-  | { kind: "tui"; initialMagnet?: string; initialTorrent?: string }
   | { kind: "search" }
   | { kind: "invalid"; arg: string };
 
@@ -23,7 +22,6 @@ export function parseCliArgs(argv: string[]): CliCommand {
   const a = args[0]!;
   if (a === "--version" || a === "-v") return { kind: "version" };
   if (a === "--help" || a === "-h") return { kind: "help" };
-  if (a === "--tui") return { kind: "tui", ...launchArgs(args.slice(1)) };
   if (a === "--search") return { kind: "search" };
   if (a === "--gui") return { kind: "gui", ...launchArgs(args.slice(1)) };
   if (/^magnet:\?/i.test(a)) return { kind: "gui", initialMagnet: a };
@@ -35,12 +33,11 @@ export function parseCliArgs(argv: string[]): CliCommand {
 export const HELP_TEXT = `torlink — torrent search & download
 
 usage
-  torlnk                      open the GUI (browser fallback, or Tauri desktop app)
+  torlnk                      open the browser search UI (or use the desktop app)
   torlnk --gui                same as default
-  torlnk --tui                terminal UI (search only — downloads need desktop app)
   torlnk --search             search API server only (dev)
-  torlnk "magnet:?xt=..."     start a download on launch
-  torlnk path/to/file.torrent open a .torrent file on launch
+  torlnk "magnet:?xt=..."     open with a magnet link (desktop app)
+  torlnk path/to/file.torrent open a .torrent file (desktop app)
   torlnk --version            print the version
 
 desktop app: install from GitHub Releases for full download/seeding (librqbit)
