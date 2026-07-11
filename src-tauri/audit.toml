@@ -3,4 +3,15 @@ ignore = [
     # Transitive via librqbit-upnp; waiting on upstream quick-xml bump.
     "RUSTSEC-2026-0194",
     "RUSTSEC-2026-0195",
+    # Transitive via Tauri/GTK3 — unmaintained/unsound until upstream migrates.
+    "RUSTSEC-2024-0420",
+    "RUSTSEC-2024-0419",
+    "RUSTSEC-2024-0384",
+    "RUSTSEC-2024-0370",
+    "RUSTSEC-2025-0081",
+    "RUSTSEC-2025-0075",
+    "RUSTSEC-2025-0080",
+    "RUSTSEC-2025-0100",
+    "RUSTSEC-2025-0098",
+    "RUSTSEC-2024-0429",
 ]
