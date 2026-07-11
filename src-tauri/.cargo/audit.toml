@@ -16,5 +16,5 @@ ignore = [
     "RUSTSEC-2024-0429",
 ]
 
-[settings]
-ignore-warnings = ["unmaintained", "unsound"]
+[output]
+deny = []
