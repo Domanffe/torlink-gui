@@ -15,3 +15,6 @@ ignore = [
     "RUSTSEC-2025-0098",
     "RUSTSEC-2024-0429",
 ]
+
+[settings]
+ignore-warnings = ["unmaintained", "unsound"]

@@ -50,5 +50,5 @@ jobs:
       - name: Audit Rust dependencies
         run: |
           cargo install cargo-audit --locked
-          cargo audit
+          cargo audit --config audit.toml
         working-directory: src-tauri
