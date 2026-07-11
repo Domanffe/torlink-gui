@@ -18,3 +18,4 @@ ignore = [
 
 [output]
 deny = []
+quiet = false
