@@ -1,6 +1,6 @@
 import { fetchResilient, HttpError, USER_AGENT } from "../util/net";
 import { parseMagnet } from "./magnet";
-import type { SearchOptions, Source, TorrentResult } from "./types";
+import type { SearchOptions, TorrentResult } from "./types";
 
 const API = "https://subsplease.org/api/";
 const RES_PREFERENCE = ["1080", "720", "480"];
@@ -48,7 +48,7 @@ export function mapSubsplease(json: Record<string, SpEntry>): TorrentResult[] {
   return out;
 }
 
-async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+export async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
   const q = query.trim();
   const params = new URLSearchParams({ tz: "UTC" });
   if (q) {
@@ -68,12 +68,3 @@ async function search(query: string, opts: SearchOptions = {}): Promise<TorrentR
   if (!json || Array.isArray(json)) return [];
   return mapSubsplease(json);
 }
-export const subsplease: Source = {
-  id: "subsplease",
-  label: "SubsPlease",
-  group: "Anime",
-  homepage: "https://subsplease.org",
-  // The SubsPlease API has no swarm data; every result reports seeders: 0.
-  reportsHealth: false,
-  search,
-};

@@ -1,9 +1,12 @@
 import { fetchResilient, HttpError, USER_AGENT } from "../util/net";
 import { buildMagnet } from "./magnet";
-import type { SearchOptions, Source, SourceId, TorrentResult } from "./types";
+import type { SearchOptions, SourceId, TorrentResult } from "./types";
 
 const BASE = "https://bittorrented.com";
 const MIN_QUERY = 3;
+
+const TV_PATTERN =
+  /\bS\d{1,2}E\d{1,3}\b|\bS\d{1,2}\b|\bseason\s*\d|\bcomplete\s*series\b|\b\d{1,2}x\d{2}\b/i;
 
 interface BtResult {
   torrent_infohash?: string;
@@ -25,6 +28,20 @@ function toUnixSeconds(iso: string | undefined): number | undefined {
   return Number.isNaN(ms) ? undefined : Math.floor(ms / 1000);
 }
 
+export function isTvReleaseName(name: string): boolean {
+  return TV_PATTERN.test(name);
+}
+
+export function filterBittorrentedResults(
+  results: TorrentResult[],
+  source: SourceId,
+): TorrentResult[] {
+  if (source === "bittorrented-tv") {
+    return results.filter((r) => isTvReleaseName(r.name));
+  }
+  return results.filter((r) => !isTvReleaseName(r.name));
+}
+
 export function mapBittorrentedResults(results: BtResult[], id: SourceId): TorrentResult[] {
   const out: TorrentResult[] = [];
   for (const r of results) {
@@ -43,19 +60,12 @@ export function mapBittorrentedResults(results: BtResult[], id: SourceId): Torre
       added: toUnixSeconds(r.torrent_created_at),
     });
   }
-  return out;
+  return filterBittorrentedResults(out, id);
 }
 
-async function search(
-  query: string,
-  source: SourceId,
-  opts: SearchOptions = {},
-): Promise<TorrentResult[]> {
-  const q = query.trim();
-  if (q.length < MIN_QUERY) return [];
-
+async function fetchResults(query: string, opts: SearchOptions): Promise<BtResult[]> {
   const params = new URLSearchParams({
-    q,
+    q: query,
     type: "video",
     limit: "50",
     sortBy: "seeders",
@@ -69,23 +79,19 @@ async function search(
   if (!res.ok) throw new HttpError(res.status, `BitTorrented returned ${res.status}`);
 
   const json = (await res.json()) as BtResponse;
-  return mapBittorrentedResults(json.results ?? [], source);
+  return json.results ?? [];
 }
 
-export const bittorrentedMovies: Source = {
-  id: "bittorrented-movies",
-  label: "BitTorrented",
-  group: "Movies",
-  homepage: BASE,
-  reportsHealth: true,
-  search: (query, opts = {}) => search(query, "bittorrented-movies", opts),
-};
+async function search(source: SourceId, query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+  const q = query.trim();
+  if (q.length < MIN_QUERY) return [];
+  return mapBittorrentedResults(await fetchResults(q, opts), source);
+}
 
-export const bittorrentedTv: Source = {
-  id: "bittorrented-tv",
-  label: "BitTorrented",
-  group: "TV",
-  homepage: BASE,
-  reportsHealth: true,
-  search: (query, opts = {}) => search(query, "bittorrented-tv", opts),
-};
+export async function searchMovies(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+  return search("bittorrented-movies", query, opts);
+}
+
+export async function searchTv(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+  return search("bittorrented-tv", query, opts);
+}

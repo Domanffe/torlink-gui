@@ -213,6 +213,26 @@
   flex-shrink: 0;
 }
 
+.search-filters {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.search-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.search-filter input {
+  accent-color: var(--color-brand-purple);
+}
+
 /* ── Results ──────────────────────────────────────── */
 
 .results-table {

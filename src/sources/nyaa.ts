@@ -2,7 +2,7 @@ import { decodeResponseText, fetchResilient, HttpError, USER_AGENT } from "../ut
 import { buildMagnet } from "./magnet";
 import { unescapeEntities } from "./rss";
 import { parseSize } from "../util/format";
-import type { SearchOptions, Source, TorrentResult } from "./types";
+import type { SearchOptions, SourceId, TorrentResult } from "./types";
 
 const BASE = "https://nyaa.si/";
 
@@ -33,7 +33,7 @@ export function parseNyaaRss(xml: string): TorrentResult[] {
   return out;
 }
 
-async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+export async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
   const params = new URLSearchParams({ page: "rss", q: query.trim(), c: "0_0", f: "0" });
   const res = await fetchResilient(`${BASE}?${params.toString()}`, {
     headers: { "User-Agent": USER_AGENT },
@@ -44,12 +44,3 @@ async function search(query: string, opts: SearchOptions = {}): Promise<TorrentR
   const xml = await decodeResponseText(res);
   return parseNyaaRss(xml);
 }
-
-export const nyaa: Source = {
-  id: "nyaa",
-  label: "Nyaa",
-  group: "Anime",
-  homepage: "https://nyaa.si",
-  reportsHealth: true,
-  search,
-};

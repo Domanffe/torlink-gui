@@ -1,22 +1,73 @@
-import { useState } from "react";
-import { TorrentProvider } from "./hooks/useTorrents";
+import { invoke } from "@tauri-apps/api/core";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { TorrentProvider, useTorrents } from "./hooks/useTorrents";
 import { Shell } from "./components/Shell";
 import { SplashView } from "./views/SplashView";
 import { markSplashSeen, shouldSkipSplash } from "./util/splash";
+import { isTauri } from "./util/tauri";
 
 export type Section = "all" | "games" | "movies" | "tv" | "anime" | "downloads" | "seeding";
 
+interface PendingLaunch {
+  magnet: string;
+  name: string;
+  infoHash: string;
+}
+
+function AppInner({
+  initialQuery,
+  initialSection,
+  pendingLaunch,
+}: {
+  initialQuery: string;
+  initialSection: Section;
+  pendingLaunch: PendingLaunch | null;
+}) {
+  const { addDownload } = useTorrents();
+  const launched = useRef(false);
+
+  useEffect(() => {
+    if (!pendingLaunch || launched.current) return;
+    launched.current = true;
+    void addDownload({
+      id: pendingLaunch.infoHash,
+      name: pendingLaunch.name,
+      magnet: pendingLaunch.magnet,
+      source: "magnet",
+      sizeBytes: 0,
+    });
+  }, [addDownload, pendingLaunch]);
+
+  return <Shell initialQuery={initialQuery} initialSection={initialSection} />;
+}
+
 export function App() {
-  const [showSplash, setShowSplash] = useState(() => !shouldSkipSplash());
+  const [boot, setBoot] = useState<{
+    pending: PendingLaunch | null;
+    showSplash: boolean;
+  } | null>(null);
   const [initialQuery, setInitialQuery] = useState("");
 
-  const enterApp = (query: string): void => {
+  useEffect(() => {
+    if (!isTauri()) {
+      setBoot({ pending: null, showSplash: !shouldSkipSplash() });
+      return;
+    }
+    void invoke<PendingLaunch | null>("take_pending_launch").then((pending) => {
+      if (pending) markSplashSeen();
+      setBoot({ pending, showSplash: pending ? false : !shouldSkipSplash() });
+    });
+  }, []);
+
+  const enterApp = useCallback((query: string): void => {
     markSplashSeen();
     setInitialQuery(query);
-    setShowSplash(false);
-  };
+    setBoot((b) => (b ? { ...b, showSplash: false } : b));
+  }, []);
 
-  if (showSplash) {
+  if (!boot) return null;
+
+  if (boot.showSplash) {
     return (
       <SplashView
         onBrowse={() => enterApp("")}
@@ -27,7 +78,11 @@ export function App() {
 
   return (
     <TorrentProvider>
-      <Shell initialQuery={initialQuery} initialSection="all" />
+      <AppInner
+        initialQuery={initialQuery}
+        initialSection={boot.pending ? "downloads" : "all"}
+        pendingLaunch={boot.pending}
+      />
     </TorrentProvider>
   );
 }

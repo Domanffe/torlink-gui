@@ -1,19 +1,26 @@
+import { buildSource } from "./build";
 import { SOURCE_IDS } from "./meta";
 import type { Source, SourceId } from "./types";
 
 const LOADERS: Record<SourceId, () => Promise<Source>> = {
-  fitgirl: () => import("./fitgirl").then((m) => m.fitgirl),
-  "online-fix": () => import("./online-fix").then((m) => m.onlineFix),
-  yts: () => import("./yts").then((m) => m.yts),
-  "tpb-movies": () => import("./piratebay").then((m) => m.tpbMovies),
-  "x1337-movies": () => import("./x1337").then((m) => m.x1337Movies),
-  "bittorrented-movies": () => import("./bittorrented").then((m) => m.bittorrentedMovies),
-  eztv: () => import("./eztv").then((m) => m.eztv),
-  "tpb-tv": () => import("./piratebay").then((m) => m.tpbTv),
-  "x1337-tv": () => import("./x1337").then((m) => m.x1337Tv),
-  "bittorrented-tv": () => import("./bittorrented").then((m) => m.bittorrentedTv),
-  nyaa: () => import("./nyaa").then((m) => m.nyaa),
-  subsplease: () => import("./subsplease").then((m) => m.subsplease),
+  fitgirl: () => import("./fitgirl").then((m) => buildSource("fitgirl", m.search)),
+  "online-fix": () => import("./online-fix").then((m) => buildSource("online-fix", m.search)),
+  xatab: () => import("./xatab").then((m) => buildSource("xatab", m.search)),
+  yts: () => import("./yts").then((m) => buildSource("yts", m.search)),
+  "tpb-movies": () => import("./piratebay").then((m) => buildSource("tpb-movies", m.searchMovies)),
+  "x1337-movies": () => import("./x1337").then((m) => buildSource("x1337-movies", m.searchMovies)),
+  "bittorrented-movies": () =>
+    import("./bittorrented").then((m) => buildSource("bittorrented-movies", m.searchMovies)),
+  "tgx-movies": () => import("./torrentgalaxy").then((m) => buildSource("tgx-movies", m.search)),
+  eztv: () => import("./eztv").then((m) => buildSource("eztv", m.search)),
+  "tpb-tv": () => import("./piratebay").then((m) => buildSource("tpb-tv", m.searchTv)),
+  "x1337-tv": () => import("./x1337").then((m) => buildSource("x1337-tv", m.searchTv)),
+  "bittorrented-tv": () =>
+    import("./bittorrented").then((m) => buildSource("bittorrented-tv", m.searchTv)),
+  torlock: () => import("./torlock").then((m) => buildSource("torlock", m.search)),
+  nyaa: () => import("./nyaa").then((m) => buildSource("nyaa", m.search)),
+  subsplease: () => import("./subsplease").then((m) => buildSource("subsplease", m.search)),
+  anilibria: () => import("./anilibria").then((m) => buildSource("anilibria", m.search)),
 };
 
 const loaded = new Map<SourceId, Source>();

@@ -1,7 +1,7 @@
 import { decodeResponseText, fetchResilient, HttpError, USER_AGENT } from "../util/net";
 import { unescapeEntities } from "./rss";
 import { parseSize } from "../util/format";
-import type { SearchOptions, Source, SourceId, TorrentResult } from "./types";
+import type { SearchOptions, SourceId, TorrentResult } from "./types";
 
 const HOSTS = ["1337x.to", "1337x.st", "x1337x.ws", "1337xx.to"];
 let workingHostIndex = 0;
@@ -79,7 +79,7 @@ async function detailInfo(
   }
 }
 
-async function search(
+async function searchCategory(
   query: string,
   cat: "Movies" | "TV",
   source: SourceId,
@@ -141,20 +141,10 @@ async function search(
   return settled.filter((r): r is TorrentResult => r !== null);
 }
 
-export const x1337Movies: Source = {
-  id: "x1337-movies",
-  label: "1337x",
-  group: "Movies",
-  homepage: "https://1337x.to",
-  reportsHealth: true,
-  search: (query, opts = {}) => search(query, "Movies", "x1337-movies", opts),
-};
+export async function searchMovies(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+  return searchCategory(query, "Movies", "x1337-movies", opts);
+}
 
-export const x1337Tv: Source = {
-  id: "x1337-tv",
-  label: "1337x",
-  group: "TV",
-  homepage: "https://1337x.to",
-  reportsHealth: true,
-  search: (query, opts = {}) => search(query, "TV", "x1337-tv", opts),
-};
+export async function searchTv(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+  return searchCategory(query, "TV", "x1337-tv", opts);
+}

@@ -83,7 +83,7 @@ describe("parseTorrentFileFromListing", () => {
 
 describe("onlineFix search", () => {
   it("resolves magnets from search results", async () => {
-    const { onlineFix } = await import("./online-fix");
+    const { search } = await import("./online-fix");
     mockFetch
       .mockResolvedValueOnce(
         page(
@@ -96,7 +96,7 @@ describe("onlineFix search", () => {
       .mockResolvedValueOnce(page(`<a href="elden.torrent">elden</a>`))
       .mockResolvedValueOnce(page(""));
 
-    const results = await onlineFix.search("elden");
+    const results = await search("elden");
     expect(results).toHaveLength(1);
     expect(results[0]!.name).toBe("Elden Ring");
     expect(results[0]!.source).toBe("online-fix");

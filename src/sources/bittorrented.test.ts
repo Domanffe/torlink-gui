@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { mapBittorrentedResults, bittorrentedMovies, bittorrentedTv } from "./bittorrented";
+import {
+  mapBittorrentedResults,
+  isTvReleaseName,
+  filterBittorrentedResults,
+} from "./bittorrented";
+import { getSourceMeta } from "./meta";
 
 describe("mapBittorrentedResults", () => {
   it("maps an API row to a torrent result with a built magnet, tagged by source id", () => {
@@ -32,7 +37,7 @@ describe("mapBittorrentedResults", () => {
 
   it("defaults missing seeders/size to 0", () => {
     const [r] = mapBittorrentedResults(
-      [{ torrent_infohash: "a".repeat(40), torrent_name: "x", torrent_seeders: null }],
+      [{ torrent_infohash: "a".repeat(40), torrent_name: "Show S01E01", torrent_seeders: null }],
       "bittorrented-tv",
     );
     expect(r).toMatchObject({ seeders: 0, leechers: 0, sizeBytes: 0 });
@@ -53,11 +58,41 @@ describe("mapBittorrentedResults", () => {
   });
 });
 
-describe("bittorrented sources", () => {
+describe("bittorrented category filters", () => {
+  it("detects TV release names", () => {
+    expect(isTvReleaseName("Breaking Bad S01E01 1080p")).toBe(true);
+    expect(isTvReleaseName("Old School (2003)")).toBe(false);
+  });
+
+  it("splits movies and tv from the same raw list", () => {
+    const raw = [
+      {
+        infoHash: "a".repeat(40),
+        name: "Movie Title (2020)",
+        sizeBytes: 1,
+        seeders: 1,
+        leechers: 0,
+        source: "bittorrented-movies" as const,
+        magnet: `magnet:?xt=urn:btih:${"a".repeat(40)}`,
+      },
+      {
+        infoHash: "b".repeat(40),
+        name: "Series S02E03",
+        sizeBytes: 1,
+        seeders: 1,
+        leechers: 0,
+        source: "bittorrented-movies" as const,
+        magnet: `magnet:?xt=urn:btih:${"b".repeat(40)}`,
+      },
+    ];
+    expect(filterBittorrentedResults(raw, "bittorrented-movies")).toHaveLength(1);
+    expect(filterBittorrentedResults(raw, "bittorrented-tv")).toHaveLength(1);
+  });
+
   it("feeds Movies and TV only", () => {
-    expect(bittorrentedMovies.group).toBe("Movies");
-    expect(bittorrentedTv.group).toBe("TV");
-    expect(bittorrentedMovies.reportsHealth).toBe(true);
-    expect(bittorrentedTv.reportsHealth).toBe(true);
+    expect(getSourceMeta("bittorrented-movies").group).toBe("Movies");
+    expect(getSourceMeta("bittorrented-tv").group).toBe("TV");
+    expect(getSourceMeta("bittorrented-movies").reportsHealth).toBe(true);
+    expect(getSourceMeta("bittorrented-tv").reportsHealth).toBe(true);
   });
 });

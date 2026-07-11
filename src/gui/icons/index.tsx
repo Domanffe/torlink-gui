@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { AnimatedIconProps } from "./types";
+import type { IconProps } from "./types";
 import BatteryPauseIcon from "./battery-pause-icon";
 import FlameIcon from "./flame-icon";
 import DownloadIcon from "./download-icon";
@@ -13,7 +13,7 @@ import SparklesIcon from "./sparkles-icon";
 import TriangleAlertIcon from "./triangle-alert-icon";
 import UploadIcon from "./upload-icon";
 
-export type IconComponent = ComponentType<AnimatedIconProps>;
+export type IconComponent = ComponentType<IconProps>;
 
 export function UiIcon({
   icon: Icon,

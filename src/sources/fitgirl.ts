@@ -1,14 +1,11 @@
 import { fetchWordpressRss } from "./rss";
-import type { Source } from "./types";
+import type { SearchOptions, TorrentResult } from "./types";
 
 const HOME = "https://fitgirl-repacks.site";
 
-export const fitgirl: Source = {
-  id: "fitgirl",
-  label: "FitGirl",
-  group: "Games",
-  homepage: HOME,
-  // WordPress RSS carries no swarm data; every result reports seeders: 0.
-  reportsHealth: false,
-  search: (query, opts) => fetchWordpressRss(HOME, "fitgirl", query, opts),
-};
+export async function search(
+  query: string,
+  opts?: SearchOptions,
+): Promise<TorrentResult[]> {
+  return fetchWordpressRss(HOME, "fitgirl", query, opts);
+}

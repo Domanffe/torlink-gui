@@ -1,10 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { fitgirl } from "./fitgirl";
+import { getSourceMeta } from "./meta";
+import { buildSource } from "./build";
+import { search } from "./fitgirl";
 
 describe("fitgirl source", () => {
   it("uses wordpress rss without swarm health", () => {
-    expect(fitgirl.id).toBe("fitgirl");
-    expect(fitgirl.reportsHealth).toBe(false);
-    expect(fitgirl.homepage).toContain("fitgirl-repacks.site");
+    const meta = getSourceMeta("fitgirl");
+    expect(meta.reportsHealth).toBe(false);
+    expect(meta.homepage).toContain("fitgirl-repacks.site");
+    expect(buildSource("fitgirl", search).id).toBe("fitgirl");
   });
 });

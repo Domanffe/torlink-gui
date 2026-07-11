@@ -43,6 +43,7 @@ export const ru: Messages = {
     colHealth: "Сид:Лич",
     colSrc: "Ист.",
     browseOnly: "обзор",
+    aliveOnly: "Только с сидами",
     healthUnknown: "—",
   },
   downloads: {

@@ -1,6 +1,6 @@
 import { fetchResilient, HttpError, USER_AGENT } from "../util/net";
 import { buildMagnet } from "./magnet";
-import type { SearchOptions, Source, SourceId, TorrentResult } from "./types";
+import type { SearchOptions, SourceId, TorrentResult } from "./types";
 
 const API = "https://apibay.org";
 
@@ -59,7 +59,7 @@ async function fetchItems(url: string, opts: SearchOptions): Promise<ApibayItem[
   return Array.isArray(json) ? json : [];
 }
 
-async function search(
+async function searchCategory(
   query: string,
   cats: Set<number>,
   browseUrl: string,
@@ -80,20 +80,10 @@ async function search(
   return out;
 }
 
-export const tpbMovies: Source = {
-  id: "tpb-movies",
-  label: "TPB",
-  group: "Movies",
-  homepage: "https://thepiratebay.org",
-  reportsHealth: true,
-  search: (query, opts = {}) => search(query, MOVIE_CATS, TOP_MOVIES, "tpb-movies", opts),
-};
+export async function searchMovies(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+  return searchCategory(query, MOVIE_CATS, TOP_MOVIES, "tpb-movies", opts);
+}
 
-export const tpbTv: Source = {
-  id: "tpb-tv",
-  label: "TPB",
-  group: "TV",
-  homepage: "https://thepiratebay.org",
-  reportsHealth: true,
-  search: (query, opts = {}) => search(query, TV_CATS, TOP_TV, "tpb-tv", opts),
-};
+export async function searchTv(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+  return searchCategory(query, TV_CATS, TOP_TV, "tpb-tv", opts);
+}

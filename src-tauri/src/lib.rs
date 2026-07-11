@@ -1,6 +1,7 @@
 mod config;
 mod commands;
 mod fs;
+mod launch;
 mod path_guard;
 mod persistence;
 mod sidecar;
@@ -20,6 +21,7 @@ use torrent::TorrentManager;
 pub struct AppState {
     pub torrents: Arc<Mutex<TorrentManager>>,
     pub search: Mutex<sidecar::SearchSidecar>,
+    pub(crate) pending_launch: Mutex<Option<launch::PendingLaunch>>,
 }
 
 fn is_russian_locale() -> bool {
@@ -120,6 +122,7 @@ pub fn run() {
             app.manage(AppState {
                 torrents: manager,
                 search: Mutex::new(search),
+                pending_launch: Mutex::new(launch::parse_startup_launch()),
             });
 
             if let Some(window) = app.get_webview_window("main") {
@@ -148,6 +151,7 @@ pub fn run() {
             torrent::commands::torrent_clear_history,
             torrent::commands::get_search_port,
             torrent::commands::get_version,
+            torrent::commands::take_pending_launch,
             commands::open_folder,
         ])
         .build(tauri::generate_context!())

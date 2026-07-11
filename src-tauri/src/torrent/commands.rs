@@ -121,3 +121,10 @@ pub async fn get_search_port(state: State<'_, AppState>) -> Result<u16, String> 
 pub fn get_version() -> &'static str {
     env!("CARGO_PKG_VERSION")
 }
+
+#[tauri::command]
+pub async fn take_pending_launch(
+    state: State<'_, crate::AppState>,
+) -> Result<Option<crate::launch::PendingLaunch>, String> {
+    Ok(state.pending_launch.lock().await.take())
+}

@@ -41,6 +41,7 @@ export const en = {
     colHealth: "Seed:Lee",
     colSrc: "Src",
     browseOnly: "browse",
+    aliveOnly: "Seeded only",
     healthUnknown: "—",
   },
   downloads: {

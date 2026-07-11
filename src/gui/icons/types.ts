@@ -8,7 +8,7 @@ export function scaledStrokeWidth(
   return strokeWidth * (viewBoxSize / 24);
 }
 
-export interface AnimatedIconProps extends Omit<
+export interface IconProps extends Omit<
   SVGProps<SVGSVGElement>,
   | "ref"
   | "onAnimationStart"
@@ -24,17 +24,10 @@ export interface AnimatedIconProps extends Omit<
   | "onDrop"
   | "values"
 > {
-  /** Icon size in pixels or CSS string */
   size?: number | string;
-  /** Icon color (defaults to currentColor) */
   color?: string;
-  /** SVG stroke width */
   strokeWidth?: number;
-  /** Additional CSS classes */
   className?: string;
 }
 
-export interface AnimatedIconHandle {
-  startAnimation: () => void;
-  stopAnimation: () => void;
-}
+export type AnimatedIconProps = IconProps;

@@ -28,6 +28,7 @@ export function SearchView({
   const [activeQuery, setActiveQuery] = useState<string | null>(initialQuery.trim() || null);
   const [selected, setSelected] = useState<TorrentResult | null>(null);
   const [sortSeeders, setSortSeeders] = useState(true);
+  const [aliveOnly, setAliveOnly] = useState(false);
   const port = useSearchPort();
   const search = useSearch(activeQuery, port);
   const { addDownload } = useTorrents();
@@ -40,6 +41,11 @@ export function SearchView({
     let list = search.results;
     const group = CATEGORY_GROUP[category];
     if (group) list = list.filter((r) => getSourceMeta(r.source).group === group);
+    if (aliveOnly) {
+      list = list.filter(
+        (r) => !getSourceMeta(r.source).reportsHealth || r.seeders > 0,
+      );
+    }
     if (sortSeeders) {
       list = [...list].sort((a, b) => {
         const aHealth = getSourceMeta(a.source).reportsHealth;
@@ -50,7 +56,7 @@ export function SearchView({
       });
     }
     return list;
-  }, [search.results, category, sortSeeders]);
+  }, [search.results, category, sortSeeders, aliveOnly]);
 
   const formatHealth = (r: TorrentResult): string => {
     if (!getSourceMeta(r.source).reportsHealth) return t("search.healthUnknown");
@@ -83,6 +89,9 @@ export function SearchView({
       }
       if (e.key === "s" && document.activeElement?.tagName !== "INPUT") {
         setSortSeeders((v) => !v);
+      }
+      if (e.key === "a" && document.activeElement?.tagName !== "INPUT") {
+        setAliveOnly((v) => !v);
       }
       if (e.key === "d" && selected) download(selected);
       if (e.key === "Escape") setSelected(null);
@@ -153,6 +162,17 @@ export function SearchView({
         category={category}
         active={!!activeQuery}
       />
+
+      <div className="search-filters">
+        <label className="search-filter">
+          <input
+            type="checkbox"
+            checked={aliveOnly}
+            onChange={(e) => setAliveOnly(e.target.checked)}
+          />
+          {t("search.aliveOnly")}
+        </label>
+      </div>
 
       <Card
         title={t("search.results")}

@@ -33,6 +33,8 @@ Each torrent is saved in its own subfolder inside the download directory (for ex
 
 **Shortcuts** (when the main view is focused): `/` focus search · `Tab` next section · `d` download · `p` pause · `f` retry · `c` cancel
 
+Open the desktop app with a magnet or `.torrent` file: `torlink "magnet:?xt=..."` queues the download immediately.
+
 ## Build
 
 ```sh
@@ -52,12 +54,12 @@ The installer bundles **librqbit** (torrents) and a packaged **search-sidecar** 
 
 | Category | Sources |
 | --- | --- |
-| Games | FitGirl, [Online-Fix](https://online-fix.me) |
-| Movies | YTS, The Pirate Bay, 1337x, BitTorrented |
-| TV | EZTV, The Pirate Bay, 1337x, BitTorrented |
-| Anime | Nyaa, SubsPlease |
+| Games | FitGirl, [Online-Fix](https://online-fix.me), Xatab |
+| Movies | YTS, The Pirate Bay, 1337x, BitTorrented, TorrentGalaxy |
+| TV | EZTV, The Pirate Bay, 1337x, BitTorrented, Torlock |
+| Anime | Nyaa, SubsPlease, AniLibria |
 
-Online-Fix covers co-op / online cracks; magnets are resolved from their torrent files at search time. If a source is down, the rest still answer.
+Online-Fix and Xatab resolve magnets from torrent files at search time. TorrentGalaxy may hit GalaxyFence captcha occasionally — other sources keep working. If a source is down, the rest still answer.
 
 ## Upstream
 

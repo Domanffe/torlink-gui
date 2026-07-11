@@ -12,16 +12,20 @@ export interface SourceMeta {
 export const SOURCE_IDS: readonly SourceId[] = [
   "fitgirl",
   "online-fix",
+  "xatab",
   "yts",
   "tpb-movies",
   "x1337-movies",
   "bittorrented-movies",
+  "tgx-movies",
   "eztv",
   "tpb-tv",
   "x1337-tv",
   "bittorrented-tv",
+  "torlock",
   "nyaa",
   "subsplease",
+  "anilibria",
 ] as const;
 
 export const SOURCE_META: Record<SourceId, SourceMeta> = {
@@ -37,6 +41,13 @@ export const SOURCE_META: Record<SourceId, SourceMeta> = {
     label: "Online-Fix",
     group: "Games",
     homepage: "https://online-fix.me",
+    reportsHealth: false,
+  },
+  xatab: {
+    id: "xatab",
+    label: "Xatab",
+    group: "Games",
+    homepage: "https://byxatab.com",
     reportsHealth: false,
   },
   yts: {
@@ -67,13 +78,19 @@ export const SOURCE_META: Record<SourceId, SourceMeta> = {
     homepage: "https://bittorrented.com",
     reportsHealth: true,
   },
+  "tgx-movies": {
+    id: "tgx-movies",
+    label: "TGx",
+    group: "Movies",
+    homepage: "https://torrentgalaxy.to",
+    reportsHealth: true,
+  },
   eztv: {
     id: "eztv",
     label: "EZTV",
     group: "TV",
     homepage: "https://eztvx.to",
     reportsHealth: true,
-    browseOnly: true,
   },
   "tpb-tv": {
     id: "tpb-tv",
@@ -96,6 +113,13 @@ export const SOURCE_META: Record<SourceId, SourceMeta> = {
     homepage: "https://bittorrented.com",
     reportsHealth: true,
   },
+  torlock: {
+    id: "torlock",
+    label: "Torlock",
+    group: "TV",
+    homepage: "https://www.torlock.com",
+    reportsHealth: true,
+  },
   nyaa: {
     id: "nyaa",
     label: "Nyaa",
@@ -109,6 +133,13 @@ export const SOURCE_META: Record<SourceId, SourceMeta> = {
     group: "Anime",
     homepage: "https://subsplease.org",
     reportsHealth: false,
+  },
+  anilibria: {
+    id: "anilibria",
+    label: "AniLibria",
+    group: "Anime",
+    homepage: "https://anilibria.top",
+    reportsHealth: true,
   },
 };
 

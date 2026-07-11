@@ -1,6 +1,6 @@
 import { fetchResilient, HttpError, USER_AGENT } from "../util/net";
 import { buildMagnet } from "./magnet";
-import type { SearchOptions, Source, TorrentResult } from "./types";
+import type { SearchOptions, TorrentResult } from "./types";
 
 const HOSTS = ["yts.mx", "yts.am", "yts.rs"];
 
@@ -65,7 +65,7 @@ async function fetchMovies(params: URLSearchParams, opts: SearchOptions): Promis
   throw lastError instanceof Error ? lastError : new HttpError(0, "YTS unreachable");
 }
 
-async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+export async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
   const q = query.trim();
   const params = new URLSearchParams({ limit: "50" });
   if (q) params.set("query_term", q);
@@ -74,12 +74,3 @@ async function search(query: string, opts: SearchOptions = {}): Promise<TorrentR
   const json = await fetchMovies(params, opts);
   return mapYtsResponse(json);
 }
-
-export const yts: Source = {
-  id: "yts",
-  label: "YTS",
-  group: "Movies",
-  homepage: "https://yts.mx",
-  reportsHealth: true,
-  search,
-};

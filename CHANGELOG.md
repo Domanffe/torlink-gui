@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+## 1.5.2 — 2026-07-11
+
+### Added
+- **Xatab** (Games) — repacks from byxatab.com
+- **TorrentGalaxy / TGx** (Movies) — HTML search with seeders
+- **Torlock** (TV) — searchable TV index with seeders
+- **AniLibria** (Anime) — official API v3 with RU titles and swarm stats
+- Desktop CLI launch: `torlink "magnet:..."` or `torlink file.torrent` queues download on startup
+- Search filter **Seeded only** (toggle in results view, hotkey `a`)
+
+### Changed
+- Source metadata lives in `meta.ts` only; adapters export `search` via `buildSource()`
+- EZTV filters latest API pages by title when you type a query (no longer browse-only)
+- BitTorrented Movies/TV split results by release name patterns (no duplicate rows)
+
+### Removed
+- Unused Node helpers `src/util/clipboard.ts` and `src/util/openFolder.ts` (GUI uses `desktop.ts`)
+
+### Notes
+- TGx may return GalaxyFence (captcha) errors; the search continues with other sources
+
 ## 1.5.1 — 2026-07-11
 
 ### Added

@@ -1,8 +1,10 @@
 import { fetchResilient, HttpError, USER_AGENT } from "../util/net";
 import { buildMagnet } from "./magnet";
-import type { SearchOptions, Source, TorrentResult } from "./types";
+import type { SearchOptions, TorrentResult } from "./types";
 
 const API = "https://eztvx.to/api/get-torrents";
+const MAX_PAGES = 3;
+const PAGE_LIMIT = 100;
 
 interface EztvTorrent {
   title?: string;
@@ -39,25 +41,35 @@ export function mapEztvResponse(json: EztvResponse): TorrentResult[] {
   return out;
 }
 
-async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
-  if (query.trim()) return [];
+export function filterEztvByQuery(results: TorrentResult[], query: string): TorrentResult[] {
+  const tokens = query
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (tokens.length === 0) return results;
+  return results.filter((r) => {
+    const hay = r.name.toLowerCase();
+    return tokens.every((t) => hay.includes(t));
+  });
+}
 
-  const res = await fetchResilient(`${API}?limit=100&page=1`, {
+async function fetchPage(page: number, opts: SearchOptions): Promise<TorrentResult[]> {
+  const res = await fetchResilient(`${API}?limit=${PAGE_LIMIT}&page=${page}`, {
     headers: { "User-Agent": USER_AGENT },
     signal: opts.signal,
     retries: 1,
   });
   if (!res.ok) throw new HttpError(res.status, `EZTV returned ${res.status}`);
-
   const json = (await res.json()) as EztvResponse;
   return mapEztvResponse(json);
 }
 
-export const eztv: Source = {
-  id: "eztv",
-  label: "EZTV",
-  group: "TV",
-  homepage: "https://eztvx.to",
-  reportsHealth: true,
-  search,
-};
+export async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
+  const q = query.trim();
+  const pages = await Promise.all(
+    Array.from({ length: q ? MAX_PAGES : 1 }, (_, i) => fetchPage(i + 1, opts)),
+  );
+  const merged = pages.flat();
+  return q ? filterEztvByQuery(merged, q) : merged;
+}

@@ -27,7 +27,7 @@ Reuse what's there before you write something new. Desktop UI lives in `src/gui/
 
 ### Cross-platform or it doesn't ship
 
-torlink runs on Windows, macOS, and Linux. Anything that touches the OS branches all three. See `src/util/clipboard.ts` for the pattern.
+torlink runs on Windows, macOS, and Linux. Desktop shell actions use `src/gui/util/desktop.ts` (Tauri invoke + browser APIs).
 
 ### Fail soft, never crash
 
@@ -35,7 +35,7 @@ When something the user can't control goes wrong, degrade gracefully and say so.
 
 ### Test the logic
 
-Non-trivial logic gets a vitest test. Pure functions are easy — see `src/util/format.test.ts`. For code that shells out, mock the node built-in — see `src/util/clipboard.test.ts`.
+Non-trivial logic gets a vitest test. Pure functions are easy — see `src/util/format.test.ts`. For code that shells out, mock the node built-in — see `src/gui/util/desktop.test.ts`.
 
 ### Respect the calm theme
 

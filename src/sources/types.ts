@@ -1,16 +1,20 @@
 export type SourceId =
   | "fitgirl"
   | "online-fix"
+  | "xatab"
   | "yts"
   | "eztv"
   | "nyaa"
   | "subsplease"
+  | "anilibria"
   | "tpb-movies"
   | "tpb-tv"
   | "x1337-movies"
   | "x1337-tv"
   | "bittorrented-movies"
-  | "bittorrented-tv";
+  | "bittorrented-tv"
+  | "tgx-movies"
+  | "torlock";
 
 export type SourceGroup = "Games" | "Movies" | "TV" | "Anime";
 

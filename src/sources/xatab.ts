@@ -4,8 +4,7 @@ import { unescapeEntities } from "./rss";
 import { magnetFromTorrentBytes } from "./torrentBytes";
 import type { SearchOptions, TorrentResult } from "./types";
 
-const HOME = "https://online-fix.me";
-const RSS_URL = `${HOME}/rss.xml`;
+const HOME = "https://byxatab.com";
 const HEADERS = { "User-Agent": USER_AGENT, Referer: `${HOME}/` };
 const MAX_RESULTS = 10;
 const MAX_CONCURRENCY = 3;
@@ -32,66 +31,57 @@ function dedupeLimit(links: GameLink[]): GameLink[] {
   return out;
 }
 
-export function parseDleSearchResults(html: string): GameLink[] {
+export function parseXatabSearchResults(html: string): GameLink[] {
   const links: GameLink[] = [];
-  const re =
-    /<a href="(https:\/\/online-fix\.me\/games\/[^"]+\.html)"[^>]*>\s*<h2 class="title">\s*([^<]+)/gi;
+  const re = /<a href="(https:\/\/byxatab\.com\/[^"]+\.html)"[^>]*>\s*([^<]+)/gi;
   for (const match of html.matchAll(re)) {
     links.push({ title: unescapeEntities(match[2]!.trim()), url: match[1]! });
   }
   return dedupeLimit(links);
 }
 
-export function parseDleRssGames(xml: string): GameLink[] {
-  const links: GameLink[] = [];
-  for (const item of xml.split("<item>").slice(1)) {
-    const url = item.match(/<link>(.*?)<\/link>/)?.[1]?.trim();
-    if (!url?.includes("/games/")) continue;
-    const title = unescapeEntities(item.match(/<title>(.*?)<\/title>/)?.[1]?.trim() ?? "Unknown");
-    const addedStr = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? "";
-    const added = addedStr ? new Date(addedStr).getTime() / 1000 : undefined;
-    links.push({ title, url, added });
-  }
-  return dedupeLimit(links);
+export function parseMagnetFromPage(html: string): string | null {
+  const raw = html.match(/href="(magnet:\?[^"]+)"/i)?.[1];
+  return raw ? unescapeEntities(raw) : null;
 }
 
-export function parseTorrentDirFromPage(html: string): string | null {
-  const match = html.match(
-    /href="(https:\/\/uploads\.online-fix\.me:\d+\/torrents\/[^"]+)"/i,
-  );
-  return match?.[1] ?? null;
-}
-
-export function parseTorrentFileFromListing(html: string, baseUrl: string): string | null {
+export function parseTorrentUrlFromPage(html: string): string | null {
   const match = html.match(/href="([^"?]+\.torrent)"/i);
   if (!match) return null;
   const href = match[1]!;
   if (/^https?:\/\//i.test(href)) return href;
-  return new URL(href, baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`).href;
+  return new URL(href, `${HOME}/`).href;
 }
 
 async function fetchText(url: string, opts: SearchOptions): Promise<string> {
   const res = await fetchResilient(url, { headers: HEADERS, signal: opts.signal });
-  if (!res.ok) throw new HttpError(res.status, `online-fix returned ${res.status}`);
+  if (!res.ok) throw new HttpError(res.status, `Xatab returned ${res.status}`);
   return decodeResponseText(res);
 }
 
-async function resolveMagnet(
-  link: GameLink,
-  opts: SearchOptions,
-): Promise<TorrentResult | null> {
+async function resolveMagnet(link: GameLink, opts: SearchOptions): Promise<TorrentResult | null> {
   try {
     const page = await fetchText(link.url, opts);
-    const torrentDir = parseTorrentDirFromPage(page);
-    if (!torrentDir) return null;
+    const direct = parseMagnetFromPage(page);
+    if (direct) {
+      const infoHash = direct.match(/urn:btih:([a-zA-Z0-9]+)/i)?.[1]?.toLowerCase();
+      if (!infoHash) return null;
+      return {
+        infoHash,
+        name: link.title,
+        sizeBytes: 0,
+        seeders: 0,
+        leechers: 0,
+        source: "xatab",
+        magnet: direct,
+        added: link.added,
+      };
+    }
 
-    const listing = await fetchText(torrentDir, opts);
-    const torrentUrl = parseTorrentFileFromListing(listing, torrentDir);
+    const torrentUrl = parseTorrentUrlFromPage(page);
     if (!torrentUrl) return null;
-
     const res = await fetchResilient(torrentUrl, { headers: HEADERS, signal: opts.signal });
     if (!res.ok) return null;
-
     const parsed = await magnetFromTorrentBytes(new Uint8Array(await res.arrayBuffer()));
     if (!parsed) return null;
 
@@ -101,7 +91,7 @@ async function resolveMagnet(
       sizeBytes: parsed.sizeBytes,
       seeders: 0,
       leechers: 0,
-      source: "online-fix",
+      source: "xatab",
       magnet: buildMagnet(parsed.infoHash, link.title),
       added: link.added,
     };
@@ -124,9 +114,9 @@ async function resolveAll(links: GameLink[], opts: SearchOptions): Promise<Torre
 
 export async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
   const q = query.trim();
-  const listUrl = q ? searchUrl(q) : RSS_URL;
-  const html = await fetchText(listUrl, opts);
-  const links = q ? parseDleSearchResults(html) : parseDleRssGames(html);
+  if (!q) return [];
+  const html = await fetchText(searchUrl(q), opts);
+  const links = parseXatabSearchResults(html);
   if (links.length === 0) return [];
   return resolveAll(links, opts);
 }
