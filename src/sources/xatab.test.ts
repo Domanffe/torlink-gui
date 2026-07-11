@@ -2,13 +2,22 @@ import { describe, it, expect } from "vitest";
 import { parseXatabSearchResults, parseMagnetFromPage } from "./xatab";
 
 describe("parseXatabSearchResults", () => {
-  it("extracts game post links", () => {
+  it("extracts grid layout game links", () => {
     const html = `
-      <a href="https://byxatab.com/games/elden-ring.html">Elden Ring RePack</a>
-      <a href="https://byxatab.com/games/other.html">Other Game</a>
+      <a href="https://byxatab.com/games/adventure/elden-ring/10-1-0-123" class="item grid-item has-overlay-on-img">
+        <div class="item__title">Elden Ring RePack</div>
+      </a>
     `;
     const links = parseXatabSearchResults(html);
-    expect(links).toHaveLength(2);
+    expect(links).toHaveLength(1);
+    expect(links[0]!.title).toBe("Elden Ring RePack");
+    expect(links[0]!.url).toContain("/games/adventure/elden-ring/");
+  });
+
+  it("falls back to legacy .html links", () => {
+    const html = `<a href="https://byxatab.com/games/elden-ring.html">Elden Ring RePack</a>`;
+    const links = parseXatabSearchResults(html);
+    expect(links).toHaveLength(1);
     expect(links[0]!.title).toBe("Elden Ring RePack");
   });
 });

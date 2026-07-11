@@ -15,8 +15,12 @@ export interface GameLink {
   added?: number;
 }
 
-function searchUrl(query: string): string {
-  return `${HOME}/index.php?do=search&subaction=search&story=${encodeURIComponent(query.trim())}`;
+function searchBody(query: string): string {
+  return new URLSearchParams({
+    do: "search",
+    subaction: "search",
+    story: query.trim(),
+  }).toString();
 }
 
 function dedupeLimit(links: GameLink[]): GameLink[] {
@@ -33,10 +37,19 @@ function dedupeLimit(links: GameLink[]): GameLink[] {
 
 export function parseXatabSearchResults(html: string): GameLink[] {
   const links: GameLink[] = [];
-  const re = /<a href="(https:\/\/byxatab\.com\/[^"]+\.html)"[^>]*>\s*([^<]+)/gi;
-  for (const match of html.matchAll(re)) {
+  const gridRe =
+    /<a href="(https:\/\/byxatab\.com\/games\/[^"]+)"[^>]*class="item grid-item[^"]*"[\s\S]*?<div class="item__title">([^<]+)/gi;
+  for (const match of html.matchAll(gridRe)) {
     links.push({ title: unescapeEntities(match[2]!.trim()), url: match[1]! });
   }
+
+  if (links.length === 0) {
+    const legacyRe = /<a href="(https:\/\/byxatab\.com\/[^"]+\.html)"[^>]*>\s*([^<]+)/gi;
+    for (const match of html.matchAll(legacyRe)) {
+      links.push({ title: unescapeEntities(match[2]!.trim()), url: match[1]! });
+    }
+  }
+
   return dedupeLimit(links);
 }
 
@@ -51,6 +64,21 @@ export function parseTorrentUrlFromPage(html: string): string | null {
   const href = match[1]!;
   if (/^https?:\/\//i.test(href)) return href;
   return new URL(href, `${HOME}/`).href;
+}
+
+async function fetchSearchHtml(query: string, opts: SearchOptions): Promise<string> {
+  const res = await fetchResilient(`${HOME}/index.php`, {
+    method: "POST",
+    headers: {
+      ...HEADERS,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: searchBody(query),
+    signal: opts.signal,
+    redirect: "follow",
+  });
+  if (!res.ok) throw new HttpError(res.status, `Xatab returned ${res.status}`);
+  return decodeResponseText(res);
 }
 
 async function fetchText(url: string, opts: SearchOptions): Promise<string> {
@@ -115,7 +143,7 @@ async function resolveAll(links: GameLink[], opts: SearchOptions): Promise<Torre
 export async function search(query: string, opts: SearchOptions = {}): Promise<TorrentResult[]> {
   const q = query.trim();
   if (!q) return [];
-  const html = await fetchText(searchUrl(q), opts);
+  const html = await fetchSearchHtml(q, opts);
   const links = parseXatabSearchResults(html);
   if (links.length === 0) return [];
   return resolveAll(links, opts);

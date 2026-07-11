@@ -4,7 +4,13 @@ import { unescapeEntities } from "./rss";
 import { parseSize } from "../util/format";
 import type { SearchOptions, TorrentResult } from "./types";
 
-const HOSTS = ["torrentgalaxy.to", "torrentgalaxy.mx"];
+const HOSTS = [
+  "torrentgalaxy.to",
+  "torrentgalaxy.mx",
+  "tgx.rs",
+  "torrentgalaxy.one",
+  "torrentgalaxy.su",
+];
 const MOVIE_CATS =
   "c3=1&c46=1&c45=1&c42=1&c4=1&c1=1&";
 let workingHostIndex = 0;
@@ -88,6 +94,10 @@ async function fetchSearchHtml(query: string, opts: SearchOptions): Promise<stri
       return html;
     } catch (e) {
       if (opts.signal?.aborted) throw e;
+      if (e instanceof HttpError && (e.status === 522 || e.status === 520)) {
+        lastError = e;
+        continue;
+      }
       lastError = e;
     }
   }

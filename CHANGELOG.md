@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.5.3 — 2026-07-11
+
+### Fixed
+- **Xatab** — POST search (GET returned 404); parser updated for new grid layout
+- **AniLibria** — migrated from deprecated `api.anilibria.tv/v3` (410) to `anilibria.top/api/v1`
+- **TGx** — added mirror hosts (`tgx.rs`, `torrentgalaxy.one`, `torrentgalaxy.su`) with failover on 522/520
+
 ## 1.5.2 — 2026-07-11
 
 ### Added
