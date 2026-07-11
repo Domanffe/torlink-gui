@@ -28,7 +28,7 @@ const GlobeIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
       animationControls.current.forEach((control) => control.stop());
       animationControls.current = [];
 
-      animate(".globe-circle", { rotate: 0 }, { duration: 0.5 });
+      animate(".globe-circle", { rotate: 0 }, { duration: 0.2 });
     };
 
     useImperativeHandle(ref, () => ({

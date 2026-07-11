@@ -11,7 +11,7 @@ const GearIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
     const [scope, animate] = useAnimate();
 
     const start = () => {
-      animate(".gear-body", { scale: [1, 1.02, 1] }, { duration: 0.6 });
+      animate(".gear-body", { scale: [1, 1.02, 1] }, { duration: 0.2 });
 
       animate(
         ".gear-center",
@@ -22,7 +22,7 @@ const GearIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
       animate(
         ".gear-rotator",
         { rotate: 360 },
-        { duration: 0.9, ease: "easeInOut" },
+        { duration: 0.2, ease: "easeInOut" },
       );
     };
 

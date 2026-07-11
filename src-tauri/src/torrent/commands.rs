@@ -25,7 +25,6 @@ pub async fn torrent_add(
     id: String,
     name: String,
     magnet: String,
-    dir: String,
     source: Option<String>,
     size_bytes: Option<u64>,
 ) -> Result<(), String> {
@@ -33,7 +32,7 @@ pub async fn torrent_add(
         .torrents
         .lock()
         .await
-        .add(id, name, magnet, dir, source, size_bytes)
+        .add(id, name, magnet, String::new(), source, size_bytes)
         .await
         .map_err(|e| e.to_string())
 }

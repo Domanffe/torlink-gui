@@ -8,7 +8,9 @@ export type SourceId =
   | "tpb-movies"
   | "tpb-tv"
   | "x1337-movies"
-  | "x1337-tv";
+  | "x1337-tv"
+  | "bittorrented-movies"
+  | "bittorrented-tv";
 
 export type SourceGroup = "Games" | "Movies" | "TV" | "Anime";
 

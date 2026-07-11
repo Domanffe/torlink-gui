@@ -40,6 +40,8 @@ export const en = {
     colSize: "Size",
     colHealth: "Seed:Lee",
     colSrc: "Src",
+    browseOnly: "browse",
+    healthUnknown: "—",
   },
   downloads: {
     active: "Active",
@@ -75,6 +77,7 @@ export const en = {
     title: "Settings",
     close: "Close",
     downloadFolder: "Download folder",
+    downloadFolderHint: "Each torrent is saved in its own subfolder here.",
     browse: "Browse",
     pickFolderTitle: "Download folder",
     extraTrackers: "Extra trackers",
@@ -96,6 +99,8 @@ export const en = {
     save: "Save",
     saving: "Saving…",
     saved: "Settings saved",
+    restartForDownloadDir:
+      "New downloads use the updated folder. Restart the app to fully switch the download engine.",
   },
   shell: {
     settings: "Settings",

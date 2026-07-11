@@ -16,7 +16,7 @@ const RadioIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
           scale: [1, 1.3, 1],
         },
         {
-          duration: 0.5,
+          duration: 0.2,
           ease: "easeInOut",
         },
       );
@@ -28,7 +28,7 @@ const RadioIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
           opacity: [1, 0.6, 1],
         },
         {
-          duration: 0.6,
+          duration: 0.2,
           ease: "easeInOut",
           delay: 0.1,
         },
@@ -41,7 +41,7 @@ const RadioIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
           opacity: [1, 0.4, 1],
         },
         {
-          duration: 0.7,
+          duration: 0.2,
           ease: "easeInOut",
           delay: 0.2,
         },

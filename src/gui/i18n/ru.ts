@@ -42,6 +42,8 @@ export const ru: Messages = {
     colSize: "Размер",
     colHealth: "Сид:Лич",
     colSrc: "Ист.",
+    browseOnly: "обзор",
+    healthUnknown: "—",
   },
   downloads: {
     active: "Активные",
@@ -77,6 +79,7 @@ export const ru: Messages = {
     title: "Настройки",
     close: "Закрыть",
     downloadFolder: "Папка загрузок",
+    downloadFolderHint: "Каждый торрент сохраняется в отдельную подпапку здесь.",
     browse: "Обзор",
     pickFolderTitle: "Папка загрузок",
     extraTrackers: "Доп. трекеры",
@@ -98,6 +101,8 @@ export const ru: Messages = {
     save: "Сохранить",
     saving: "Сохранение…",
     saved: "Настройки сохранены",
+    restartForDownloadDir:
+      "Новые загрузки используют новую папку. Перезапустите приложение для полного переключения движка загрузки.",
   },
   shell: {
     settings: "Настройки",

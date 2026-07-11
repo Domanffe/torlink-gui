@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+## 1.5.1 — 2026-07-11
+
+### Added
+- Each torrent downloads into its own subfolder under the configured download directory
+- BitTorrented search source for Movies and TV (synced from upstream 1.4.0)
+- EZTV "browse only" badge in search source strip
+- Settings hint for per-torrent subfolders and restart notice when changing download folder
+
+### Changed
+- UI refresh: Vercel/Geist dark theme — neutral surfaces, white primary buttons, `#333` borders
+- HTTP(S) tracker endpoints in default magnets for networks that block UDP (upstream 1.4.0)
+- 1337x remembers its last working mirror between searches (upstream 1.4.0)
+- Search streaming coalesces UI updates to avoid redraw bursts (upstream 1.4.0)
+- Accessibility fallbacks for reduced motion preferences
+
+### Fixed
+- Download directory validation in settings (`set_config`)
+- Torrent ID sanitization for cached `.torrent` metadata files
+- Path re-validation on torrent resume and restore
+- `SeedStatus::Missing` now persists correctly across restarts
+- Search cache eviction (TTL + 200 entry cap)
+- Sources without health data show "—" instead of misleading 0 seeders
+
 ## 1.5.0 — 2026-07-09
 
 ### Changed

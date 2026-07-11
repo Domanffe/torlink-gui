@@ -67,6 +67,9 @@ export function SettingsSheet({
         .filter(Boolean);
       await invoke("set_config", { config: { downloadDir, trackers } });
       toast(t("settings.saved"), "success");
+      if (config && downloadDir !== config.downloadDir) {
+        toast(t("settings.restartForDownloadDir"), "info");
+      }
       onSaved();
       onClose();
     } catch (e) {
@@ -145,6 +148,7 @@ export function SettingsSheet({
 
           <label className="field">
             <span className="field-label">{t("settings.downloadFolder")}</span>
+            <span className="field-hint">{t("settings.downloadFolderHint")}</span>
             <div className="field-row">
               <input
                 className="field-input"

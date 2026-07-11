@@ -24,6 +24,12 @@ function isPaused(it: QueueItem): boolean {
   return it.status === "paused";
 }
 
+function folderName(dir: string): string {
+  const normalized = dir.replace(/\\/g, "/").replace(/\/+$/, "");
+  const idx = normalized.lastIndexOf("/");
+  return idx >= 0 ? normalized.slice(idx + 1) : normalized;
+}
+
 export function DownloadsView() {
   const { t, messages } = useLocale();
   const { revealFolder } = useDesktopActions();
@@ -98,6 +104,7 @@ export function DownloadsView() {
                     <span className="download-name">{truncate(it.name, 48)}</span>
                     <span className="download-meta">
                       {fmt.bytes(it.totalBytes)}
+                      <span className="muted">{folderName(it.dir)}</span>
                       {ss && (
                         <span className="tag" style={{ color: ss.color }}>
                           {ss.tag}

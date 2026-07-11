@@ -16,7 +16,7 @@ const PlayerIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
           scale: [1, 0.8],
         },
         {
-          duration: 0.4,
+          duration: 0.2,
           ease: "easeOut",
         },
       );
@@ -29,7 +29,7 @@ const PlayerIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
           scale: [0.8, 1],
         },
         {
-          duration: 0.4,
+          duration: 0.2,
           ease: "easeOut",
         },
       );

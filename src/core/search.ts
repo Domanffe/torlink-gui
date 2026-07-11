@@ -8,7 +8,6 @@ import {
 } from "./search-state";
 
 export type { ConcurrentSearchState, SourceState } from "./search-state";
-export { blankPerSource, idleSearchState } from "./search-state";
 
 function errorCode(e: unknown): string {
   if (e instanceof HttpError && e.status > 0) return `HTTP ${e.status}`;
@@ -36,6 +35,8 @@ export interface SearchCallbacks {
   onUpdate: (state: ConcurrentSearchState) => void;
 }
 
+const RESULT_FLUSH_MS = 150;
+
 /** Run concurrent search across all sources; calls onUpdate as results stream in. */
 export async function runConcurrentSearch(
   query: string,
@@ -47,6 +48,7 @@ export async function runConcurrentSearch(
   const per = blankPerSource(true);
   let done = 0;
   const total = sources.length;
+  let timer: ReturnType<typeof setTimeout> | null = null;
 
   const emit = (): void => {
     callbacks.onUpdate({
@@ -56,6 +58,22 @@ export async function runConcurrentSearch(
       done,
       total,
     });
+  };
+
+  const scheduleEmit = (): void => {
+    if (done >= total) {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      emit();
+      return;
+    }
+    if (timer) return;
+    timer = setTimeout(() => {
+      timer = null;
+      if (!signal?.aborted) emit();
+    }, RESULT_FLUSH_MS);
   };
 
   emit();
@@ -78,8 +96,10 @@ export async function runConcurrentSearch(
       } finally {
         if (signal?.aborted) return;
         done += 1;
-        emit();
+        scheduleEmit();
       }
     }),
   );
+
+  if (timer) clearTimeout(timer);
 }

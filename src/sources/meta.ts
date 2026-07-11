@@ -6,6 +6,7 @@ export interface SourceMeta {
   group: SourceGroup;
   homepage: string;
   reportsHealth: boolean;
+  browseOnly?: boolean;
 }
 
 export const SOURCE_IDS: readonly SourceId[] = [
@@ -14,9 +15,11 @@ export const SOURCE_IDS: readonly SourceId[] = [
   "yts",
   "tpb-movies",
   "x1337-movies",
+  "bittorrented-movies",
   "eztv",
   "tpb-tv",
   "x1337-tv",
+  "bittorrented-tv",
   "nyaa",
   "subsplease",
 ] as const;
@@ -57,12 +60,20 @@ export const SOURCE_META: Record<SourceId, SourceMeta> = {
     homepage: "https://1337x.to",
     reportsHealth: true,
   },
+  "bittorrented-movies": {
+    id: "bittorrented-movies",
+    label: "BitTorrented",
+    group: "Movies",
+    homepage: "https://bittorrented.com",
+    reportsHealth: true,
+  },
   eztv: {
     id: "eztv",
     label: "EZTV",
     group: "TV",
     homepage: "https://eztvx.to",
     reportsHealth: true,
+    browseOnly: true,
   },
   "tpb-tv": {
     id: "tpb-tv",
@@ -76,6 +87,13 @@ export const SOURCE_META: Record<SourceId, SourceMeta> = {
     label: "1337x",
     group: "TV",
     homepage: "https://1337x.to",
+    reportsHealth: true,
+  },
+  "bittorrented-tv": {
+    id: "bittorrented-tv",
+    label: "BitTorrented",
+    group: "TV",
+    homepage: "https://bittorrented.com",
     reportsHealth: true,
   },
   nyaa: {

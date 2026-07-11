@@ -18,7 +18,7 @@ const FlameIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
           x: [0, 1, -1, 0.5, 0],
         },
         {
-          duration: 0.6,
+          duration: 0.2,
           ease: "easeOut",
         },
       );

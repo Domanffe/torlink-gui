@@ -1,5 +1,84 @@
 use std::path::{Component, Path, PathBuf};
 
+const MAX_FOLDER_NAME_LEN: usize = 200;
+
+/// Sanitize a torrent name for use as a single folder component.
+pub fn sanitize_folder_name(name: &str) -> String {
+    let mut out = String::with_capacity(name.len().min(MAX_FOLDER_NAME_LEN));
+    let mut prev_space = false;
+    for ch in name.chars() {
+        if matches!(ch, '\\' | '/' | ':' | '*' | '?' | '"' | '<' | '>' | '|') {
+            continue;
+        }
+        if ch.is_control() {
+            continue;
+        }
+        if ch.is_whitespace() {
+            if !prev_space && !out.is_empty() {
+                out.push(' ');
+                prev_space = true;
+            }
+            continue;
+        }
+        prev_space = false;
+        out.push(ch);
+        if out.len() >= MAX_FOLDER_NAME_LEN {
+            break;
+        }
+    }
+    let trimmed = out.trim().trim_end_matches('.').to_string();
+    if trimmed.is_empty() {
+        "torrent".into()
+    } else {
+        trimmed
+    }
+}
+
+fn hash_suffix(id: &str) -> String {
+    let id = id.trim().to_ascii_lowercase();
+    id.chars().take(8).collect()
+}
+
+/// Build a per-torrent download path under `download_root`.
+/// When `occupied` contains another torrent's folder name, append ` (hash)`.
+pub fn resolve_torrent_dir(
+    download_root: &str,
+    name: &str,
+    id: &str,
+    occupied: &[String],
+) -> Result<PathBuf, String> {
+    let root = validate_download_root(download_root)?;
+    let base = sanitize_folder_name(name);
+
+    let needs_suffix = occupied.iter().any(|dir| {
+        Path::new(dir)
+            .file_name()
+            .map(|n| n.to_string_lossy().eq_ignore_ascii_case(&base))
+            .unwrap_or(false)
+    });
+
+    let folder = if needs_suffix {
+        format!("{} ({})", base, hash_suffix(id))
+    } else {
+        base
+    };
+
+    validate_download_path(
+        &root.join(&folder).to_string_lossy(),
+        download_root,
+    )
+}
+
+/// Validate a download root path for config changes.
+pub fn validate_download_root(root: &str) -> Result<PathBuf, String> {
+    reject_parent_components(root)?;
+    let trimmed = root.trim();
+    if trimmed.is_empty() {
+        return Err("download directory cannot be empty".into());
+    }
+    canonical_root(trimmed)
+}
+
 /// Reject paths containing `..` before filesystem access.
 pub fn reject_parent_components(path: &str) -> Result<(), String> {
     if Path::new(path)
@@ -122,6 +201,66 @@ mod tests {
         let root_s = root.to_string_lossy().to_string();
         let nested_s = nested.to_string_lossy().to_string();
         assert!(validate_download_path(&nested_s, &root_s).is_ok());
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn sanitize_folder_name_strips_invalid_chars() {
+        assert_eq!(sanitize_folder_name(r#"Game: Name\Part*2?"#), "Game NamePart2");
+        assert_eq!(sanitize_folder_name("   "), "torrent");
+    }
+
+    #[test]
+    fn sanitize_folder_name_truncates_long_names() {
+        let long = "a".repeat(300);
+        assert!(sanitize_folder_name(&long).len() <= MAX_FOLDER_NAME_LEN);
+    }
+
+    #[test]
+    fn validate_download_root_rejects_parent_dir() {
+        assert!(validate_download_root("../etc").is_err());
+    }
+
+    #[test]
+    fn validate_download_root_accepts_existing_dir() {
+        let root = std::env::temp_dir().join(format!(
+            "torlink-dl-cfg-{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root).unwrap();
+        let root_s = root.to_string_lossy().to_string();
+        assert!(validate_download_root(&root_s).is_ok());
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn resolve_torrent_dir_builds_nested_path() {
+        let root = std::env::temp_dir().join(format!(
+            "torlink-dl-resolve-{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root).unwrap();
+        let root_s = root.to_string_lossy().to_string();
+        let resolved = resolve_torrent_dir(&root_s, "My Game", "abc123def456", &[]).unwrap();
+        assert!(resolved.ends_with("My Game"));
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn resolve_torrent_dir_adds_hash_suffix_on_collision() {
+        let root = std::env::temp_dir().join(format!(
+            "torlink-dl-collision-{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root).unwrap();
+        let root_s = root.to_string_lossy().to_string();
+        let existing = root.join("My Game").to_string_lossy().to_string();
+        let resolved =
+            resolve_torrent_dir(&root_s, "My Game", "deadbeef01234567", &[existing]).unwrap();
+        assert!(resolved.to_string_lossy().contains("(deadbeef)"));
         let _ = fs::remove_dir_all(&root);
     }
 

@@ -25,6 +25,8 @@ The npm CLI package is named **torlnk** (historical); the desktop app and Rust b
 
 Search by category, queue downloads, pause and resume, seed when done. Settings (⚙ or `Ctrl+,`) let you change the download folder, add extra trackers, and pick the interface language (**System**, **English**, **Russian**). Closing the window sends the app to the system tray.
 
+Each torrent is saved in its own subfolder inside the download directory (for example `Downloads/torlink/My Game/`).
+
 **Downloads** — pause, resume, retry on failure, cancel with a choice to keep or delete files on disk.
 
 **History** — finished torrents sit under “Recently downloaded”; you can grab them again or clear the list.
@@ -51,8 +53,8 @@ The installer bundles **librqbit** (torrents) and a packaged **search-sidecar** 
 | Category | Sources |
 | --- | --- |
 | Games | FitGirl, [Online-Fix](https://online-fix.me) |
-| Movies | YTS, The Pirate Bay, 1337x |
-| TV | EZTV, The Pirate Bay, 1337x |
+| Movies | YTS, The Pirate Bay, 1337x, BitTorrented |
+| TV | EZTV, The Pirate Bay, 1337x, BitTorrented |
 | Anime | Nyaa, SubsPlease |
 
 Online-Fix covers co-op / online cracks; magnets are resolved from their torrent files at search time. If a source is down, the rest still answer.

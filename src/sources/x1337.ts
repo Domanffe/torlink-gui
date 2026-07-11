@@ -4,6 +4,7 @@ import { parseSize } from "../util/format";
 import type { SearchOptions, Source, SourceId, TorrentResult } from "./types";
 
 const HOSTS = ["1337x.to", "1337x.st", "x1337x.ws", "1337xx.to"];
+let workingHostIndex = 0;
 
 const MAX_DETAILS = 8;
 
@@ -92,11 +93,14 @@ async function search(
   let base = "";
   let html = "";
   let lastError: unknown;
-  for (const host of HOSTS) {
+  for (let i = 0; i < HOSTS.length; i++) {
+    const hostIdx = (workingHostIndex + i) % HOSTS.length;
+    const host = HOSTS[hostIdx]!;
     try {
       const candidate = `https://${host}`;
-      html = await fetchText(`${candidate}${path}`, opts, 2);
+      html = await fetchText(`${candidate}${path}`, opts, i === 0 ? 2 : 0);
       base = candidate;
+      workingHostIndex = hostIdx;
       break;
     } catch (e) {
       if (opts.signal?.aborted) throw e;

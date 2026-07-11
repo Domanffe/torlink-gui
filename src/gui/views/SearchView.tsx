@@ -41,10 +41,21 @@ export function SearchView({
     const group = CATEGORY_GROUP[category];
     if (group) list = list.filter((r) => getSourceMeta(r.source).group === group);
     if (sortSeeders) {
-      list = [...list].sort((a, b) => b.seeders - a.seeders);
+      list = [...list].sort((a, b) => {
+        const aHealth = getSourceMeta(a.source).reportsHealth;
+        const bHealth = getSourceMeta(b.source).reportsHealth;
+        if (aHealth !== bHealth) return aHealth ? -1 : 1;
+        if (aHealth && bHealth) return b.seeders - a.seeders;
+        return 0;
+      });
     }
     return list;
   }, [search.results, category, sortSeeders]);
+
+  const formatHealth = (r: TorrentResult): string => {
+    if (!getSourceMeta(r.source).reportsHealth) return t("search.healthUnknown");
+    return `${formatCount(r.seeders)}:${formatCount(r.leechers)}`;
+  };
 
   const submit = (): void => {
     const q = input.trim();
@@ -96,10 +107,12 @@ export function SearchView({
             <dd>{fmt.bytes(selected.sizeBytes)}</dd>
             <dt>{t("search.health")}</dt>
             <dd>
-              {t("search.seedersLeechers", {
-                seeders: String(selected.seeders),
-                leechers: String(selected.leechers),
-              })}
+              {getSourceMeta(selected.source).reportsHealth
+                ? t("search.seedersLeechers", {
+                    seeders: String(selected.seeders),
+                    leechers: String(selected.leechers),
+                  })
+                : t("search.healthUnknown")}
             </dd>
             <dt>{t("search.hash")}</dt>
             <dd className="mono">{selected.infoHash}</dd>
@@ -187,8 +200,8 @@ export function SearchView({
                     <td className="col-name">{truncate(r.name, 56)}</td>
                     <td className="col-size">{fmt.bytes(r.sizeBytes)}</td>
                     <td className="col-health">
-                      <span className={r.seeders > 0 ? "good" : ""}>
-                        {formatCount(r.seeders)}:{formatCount(r.leechers)}
+                      <span className={r.seeders > 0 && getSourceMeta(r.source).reportsHealth ? "good" : ""}>
+                        {formatHealth(r)}
                       </span>
                     </td>
                     <td className="col-src">

@@ -14,7 +14,7 @@ pub enum DownloadStatus {
     Failed,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum SeedStatus {
     Seeding,
@@ -135,12 +135,31 @@ pub fn save_history(paths: &Paths, items: &[HistoryItem]) -> anyhow::Result<()> 
     write_json_atomic(&paths.history_file, items)
 }
 
+pub fn safe_torrent_id(id: &str) -> Result<String, String> {
+    let id = id.trim().to_ascii_lowercase();
+    if id.is_empty() {
+        return Err("torrent id cannot be empty".into());
+    }
+    if id.chars().all(|c| c.is_ascii_hexdigit()) && (id.len() == 32 || id.len() == 40) {
+        return Ok(id);
+    }
+    if id
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    {
+        return Ok(id);
+    }
+    Err("invalid torrent id".into())
+}
+
 pub fn torrent_meta_path(paths: &Paths, id: &str) -> std::path::PathBuf {
-    paths.torrents_dir.join(format!("{id}.torrent"))
+    let safe = safe_torrent_id(id).unwrap_or_else(|_| "invalid".into());
+    paths.torrents_dir.join(format!("{safe}.torrent"))
 }
 
 pub fn save_torrent_meta(paths: &Paths, id: &str, data: &[u8]) -> anyhow::Result<()> {
-    let path = torrent_meta_path(paths, id);
+    let safe = safe_torrent_id(id).map_err(|e| anyhow::anyhow!(e))?;
+    let path = paths.torrents_dir.join(format!("{safe}.torrent"));
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
     }
@@ -197,5 +216,34 @@ mod tests {
         let back: QueueItem = serde_json::from_str(&json).unwrap();
         assert_eq!(back.id, "abc");
         assert_eq!(back.status, DownloadStatus::Downloading);
+    }
+
+    #[test]
+    fn safe_torrent_id_accepts_hex_hash() {
+        let hash = "abcdef0123456789abcdef0123456789abcdef01";
+        assert_eq!(safe_torrent_id(hash).unwrap().len(), 40);
+    }
+
+    #[test]
+    fn safe_torrent_id_rejects_path_traversal() {
+        assert!(safe_torrent_id("../../etc/passwd").is_err());
+    }
+
+    #[test]
+    fn torrent_meta_path_uses_safe_id() {
+        let dir = std::env::temp_dir().join(format!("torlink-meta-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let paths = Paths {
+            config_file: dir.join("config.json"),
+            queue_file: dir.join("queue.json"),
+            history_file: dir.join("history.json"),
+            seeds_file: dir.join("seeds.json"),
+            torrents_dir: dir.join("torrents"),
+            data_dir: dir.clone(),
+        };
+        let path = torrent_meta_path(&paths, "abc123def4567890abc123def4567890abc123de");
+        assert!(path.ends_with("abc123def4567890abc123def4567890abc123de.torrent"));
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

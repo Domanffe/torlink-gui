@@ -19,7 +19,7 @@ const UploadIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
         await animate(
           ".arrow-group",
           { y: -12, opacity: 0 },
-          { duration: 0.4, ease: "easeIn" },
+          { duration: 0.2, ease: "easeIn" },
         );
 
         if (!isAnimatingRef.current) break;
@@ -31,7 +31,7 @@ const UploadIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
         await animate(
           ".arrow-group",
           { y: 0, opacity: 1 },
-          { duration: 0.4, ease: "easeOut" },
+          { duration: 0.2, ease: "easeOut" },
         );
 
         if (!isAnimatingRef.current) break;

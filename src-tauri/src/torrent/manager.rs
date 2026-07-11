@@ -22,7 +22,7 @@ const POLL_MS: u64 = 500;
 const RESTORE_TIMEOUT_SECS: u64 = 5;
 const STRAY_TICKS: u32 = 2;
 const SEED_GRACE_MS: u64 = 10_000;
-use crate::torrent::logic::{norm_hash, parse_bitfield_dump, seed_status, stray_download};
+use crate::torrent::logic::{norm_hash, parse_bitfield_dump, seed_status, seed_status_raw, stray_download};
 
 #[derive(Clone, serde::Serialize)]
 pub struct TorrentListResponse {
@@ -260,9 +260,39 @@ impl TorrentManager {
         }
     }
 
+    fn occupied_dirs(&self, except_id: &str) -> Vec<String> {
+        let except = norm_hash(except_id);
+        let mut dirs: Vec<String> = self
+            .queue
+            .iter()
+            .filter(|q| norm_hash(&q.id) != except)
+            .map(|q| q.dir.clone())
+            .collect();
+        dirs.extend(
+            self.seeds
+                .values()
+                .filter(|s| norm_hash(&s.id) != except)
+                .map(|s| s.dir.clone()),
+        );
+        dirs.extend(
+            self.history
+                .iter()
+                .filter(|h| norm_hash(&h.id) != except)
+                .map(|h| h.dir.clone()),
+        );
+        dirs
+    }
+
+    fn validated_dir(&self, dir: &str) -> anyhow::Result<String> {
+        crate::path_guard::validate_download_path(dir, &self.config.download_dir)
+            .map_err(|e| anyhow::anyhow!(e))
+            .map(|p| p.to_string_lossy().into_owned())
+    }
+
     async fn start_torrent(&self, _id: &str, source: &str, dir: &str) -> anyhow::Result<()> {
+        let dir = self.validated_dir(dir)?;
         let mut opts = AddTorrentOptions::default();
-        opts.output_folder = Some(dir.to_string());
+        opts.output_folder = Some(dir);
         // Required for resume / re-add when files already exist on disk.
         opts.overwrite = true;
         if !self.config.trackers.is_empty() {
@@ -335,6 +365,8 @@ impl TorrentManager {
     }
 
     pub fn set_config(&mut self, config: AppConfig) -> anyhow::Result<()> {
+        crate::path_guard::validate_download_root(&config.download_dir)
+            .map_err(|e| anyhow::anyhow!(e))?;
         self.config = config.clone();
         save_config(&self.paths, &config)?;
         Ok(())
@@ -349,15 +381,20 @@ impl TorrentManager {
         id: String,
         name: String,
         magnet: String,
-        dir: String,
+        _dir: String,
         source: Option<String>,
         size_bytes: Option<u64>,
     ) -> anyhow::Result<()> {
         let id = norm_hash(&id);
-        let dir = crate::path_guard::validate_download_path(&dir, &self.config.download_dir)
-            .map_err(|e| anyhow::anyhow!(e))?
-            .to_string_lossy()
-            .into_owned();
+        let dir = crate::path_guard::resolve_torrent_dir(
+            &self.config.download_dir,
+            &name,
+            &id,
+            &self.occupied_dirs(&id),
+        )
+        .map_err(|e| anyhow::anyhow!(e))?
+        .to_string_lossy()
+        .into_owned();
         std::fs::create_dir_all(&dir).ok();
 
         if self.seeds.remove(&id).is_some() {
@@ -728,10 +765,7 @@ impl TorrentManager {
             .values()
             .map(|s| SeedRecord {
                 id: s.id.clone(),
-                status: match s.status {
-                    SeedStatus::Paused | SeedStatus::Missing => "paused".into(),
-                    SeedStatus::Seeding => "seeding".into(),
-                },
+                status: seed_status_raw(s.status).into(),
             })
             .collect();
         save_seeds(&self.paths, &records)

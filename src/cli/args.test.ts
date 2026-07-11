@@ -18,20 +18,14 @@ describe("parseCliArgs", () => {
     expect(parseCliArgs(["--tui"])).toEqual({ kind: "invalid", arg: "--tui" });
   });
   it("launches a magnet in gui mode", () => {
-    expect(parseCliArgs(["magnet:?xt=urn:btih:abc"])).toEqual({
-      kind: "gui",
-      initialMagnet: "magnet:?xt=urn:btih:abc",
-    });
+    expect(parseCliArgs(["magnet:?xt=urn:btih:abc"])).toEqual({ kind: "gui" });
   });
   it("launches a .torrent file", () => {
-    expect(parseCliArgs(["./Foo.torrent"])).toEqual({
-      kind: "gui",
-      initialTorrent: "./Foo.torrent",
-    });
+    expect(parseCliArgs(["./Foo.torrent"])).toEqual({ kind: "gui" });
   });
   it("launches a bare infohash as a magnet (DHT)", () => {
     const hash = "abcdef0123456789abcdef0123456789abcdef01";
-    expect(parseCliArgs([hash])).toEqual({ kind: "gui", initialMagnet: hash });
+    expect(parseCliArgs([hash])).toEqual({ kind: "gui" });
   });
   it("rejects unknown arguments", () => {
     expect(parseCliArgs(["--nope"])).toEqual({ kind: "invalid", arg: "--nope" });

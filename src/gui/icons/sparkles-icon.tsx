@@ -14,7 +14,7 @@ const SparklesIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
       animate(
         ".sparkle-main",
         { rotate: 180, scale: [1, 1.2, 1] },
-        { duration: 0.6, ease: "easeInOut" },
+        { duration: 0.2, ease: "easeInOut" },
       );
 
       // top sparkle
@@ -25,7 +25,7 @@ const SparklesIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
           scale: [1, 0.8, 1.1],
           opacity: [1, 0.6, 1],
         },
-        { duration: 0.5, ease: "easeInOut", delay: 0.1 },
+        { duration: 0.2, ease: "easeInOut", delay: 0.1 },
       );
 
       // bottom sparkle
@@ -36,7 +36,7 @@ const SparklesIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(
           scale: [1, 1.15, 0.9],
           opacity: [1, 0.7, 1],
         },
-        { duration: 0.5, ease: "easeInOut", delay: 0.05 },
+        { duration: 0.2, ease: "easeInOut", delay: 0.05 },
       );
     }, [animate]);
 

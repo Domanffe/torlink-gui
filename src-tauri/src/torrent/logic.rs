@@ -13,6 +13,14 @@ pub fn seed_status(raw: &str) -> SeedStatus {
     }
 }
 
+pub fn seed_status_raw(status: SeedStatus) -> &'static str {
+    match status {
+        SeedStatus::Paused => "paused",
+        SeedStatus::Missing => "missing",
+        SeedStatus::Seeding => "seeding",
+    }
+}
+
 pub fn norm_hash(id: &str) -> String {
     id.trim().to_ascii_lowercase()
 }
@@ -46,6 +54,12 @@ mod tests {
         assert!(stray_download(1000, 200, 50));
         assert!(!stray_download(1000, 1000, 0));
         assert!(!stray_download(0, 0, 0));
+    }
+
+    #[test]
+    fn seed_status_round_trips_missing() {
+        assert_eq!(seed_status(seed_status_raw(SeedStatus::Missing)), SeedStatus::Missing);
+        assert_eq!(seed_status_raw(SeedStatus::Missing), "missing");
     }
 
     #[test]

@@ -141,12 +141,10 @@ export function TorrentProvider({ children }: { children: ReactNode }) {
         return;
       }
       try {
-        const cfg = config ?? (await invoke<AppConfig>("get_config"));
         await invoke("torrent_add", {
           id: item.id,
           name: item.name,
           magnet: item.magnet,
-          dir: cfg.downloadDir,
           source: item.source ?? null,
           sizeBytes: item.sizeBytes ?? null,
         });
@@ -156,7 +154,7 @@ export function TorrentProvider({ children }: { children: ReactNode }) {
         toast(errMsg(e), "error");
       }
     },
-    [config, refresh, tauri, toast, t],
+    [refresh, tauri, toast, t],
   );
 
   const pause = useCallback(
